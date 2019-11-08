@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="modes">
+    <file>../dependences/MyNameLogo.png</file>
+    <file>../dependences/UsbModeLogo.png</file>
+    <file>../dependences/WifiModelLogo.png</file>
+    <file>../dependences/usb.png</file>
+  </qresource>
+</RCC>
