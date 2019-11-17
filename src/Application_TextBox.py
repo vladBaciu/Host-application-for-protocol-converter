@@ -42,6 +42,7 @@ class Ui_MainWindow(object):
         self.comboBox_3.addItem("")
         self.comboBox_3.addItem("")
         self.textBrowser = QtWidgets.QTextBrowser(self.USB)
+        self.textBrowser.setEnabled(True)
         self.textBrowser.setGeometry(QtCore.QRect(260, 210, 271, 61))
         self.textBrowser.setObjectName("textBrowser")
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.USB)
@@ -139,6 +140,11 @@ class Ui_MainWindow(object):
         self.comboBox_3.setItemText(0, _translate("MainWindow", "USB to UART"))
         self.comboBox_3.setItemText(1, _translate("MainWindow", "USB to CAN"))
         self.comboBox_3.setItemText(2, _translate("MainWindow", "USB to WI-FI"))
+        self.textBrowser.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Cantarell\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">dsadasd</p></body></html>"))
         self.label_5.setText(_translate("MainWindow", "Transmit status"))
         self.label_6.setText(_translate("MainWindow", "Receive status"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.USB), _translate("MainWindow", "USB"))
@@ -163,23 +169,6 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionSettings.setText(_translate("MainWindow", "Settings"))
-        
-    def ReadCommands(self, MainWindow):
-        self.listWidget.setStyleSheet("font: 8pt Comic Sans MS")
-        with open('SupportedCommands.txt','r') as commandsFile:
-            for commands in commandsFile:
-                self.listWidget.addItem(commands)
-                      
-    def SendCommand(self, MainWindow):
-        items = self.listWidget.selectedItems()
-        self.textBrowser.clear()
-        self.textBrowser.append(self.listWidget.currentItem().text())
-    
-        
-    def CheckButton(self, MainWindow):
-        self.pushButton.clicked.connect(self.SendCommand)
-
-
 
 import LogoLabel_rc
 import Usb_rc
@@ -190,8 +179,6 @@ if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
-    ui.ReadCommands(MainWindow)
-    ui.CheckButton(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
 
