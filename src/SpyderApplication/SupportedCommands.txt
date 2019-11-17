@@ -1,0 +1,12 @@
+Get bootloader version - 0x51
+Get help - 0x52
+Get chip identification number - 0x53
+Get read protection level - 0x54
+Go to address - 0x55
+Erase flash - 0x56
+Memory write - 0x57
+Enable R/W protection - 0x58
+Memory read - 0x59
+Read sector protection status - 0x5A
+Read OTP contents - 0x5B
+Disable R/W protection - 0x5C

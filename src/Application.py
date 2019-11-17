@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainInterface.ui'
+# Form implementation generated from reading ui file 'Application.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -19,39 +17,39 @@ class Ui_MainWindow(object):
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.tabWidget.setGeometry(QtCore.QRect(20, 80, 471, 401))
         self.tabWidget.setObjectName("tabWidget")
-        self.tab = QtWidgets.QWidget()
-        self.tab.setObjectName("tab")
-        self.label_2 = QtWidgets.QLabel(self.tab)
+        self.USB = QtWidgets.QWidget()
+        self.USB.setObjectName("USB")
+        self.label_2 = QtWidgets.QLabel(self.USB)
         self.label_2.setGeometry(QtCore.QRect(270, 0, 201, 201))
         self.label_2.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_2.setObjectName("label_2")
-        self.comboBox = QtWidgets.QComboBox(self.tab)
+        self.comboBox = QtWidgets.QComboBox(self.USB)
         self.comboBox.setGeometry(QtCore.QRect(10, 20, 131, 31))
         self.comboBox.setFrame(True)
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
-        self.pushButton = QtWidgets.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(150, 90, 111, 61))
+        self.pushButton = QtWidgets.QPushButton(self.USB)
+        self.pushButton.setGeometry(QtCore.QRect(150, 90, 131, 61))
         self.pushButton.setObjectName("pushButton")
-        self.listWidget = QtWidgets.QListWidget(self.tab)
+        self.listWidget = QtWidgets.QListWidget(self.USB)
         self.listWidget.setGeometry(QtCore.QRect(10, 90, 131, 261))
         self.listWidget.setObjectName("listWidget")
         item = QtWidgets.QListWidgetItem()
         self.listWidget.addItem(item)
-        self.comboBox_3 = QtWidgets.QComboBox(self.tab)
+        self.comboBox_3 = QtWidgets.QComboBox(self.USB)
         self.comboBox_3.setGeometry(QtCore.QRect(160, 20, 131, 31))
         self.comboBox_3.setObjectName("comboBox_3")
         self.comboBox_3.addItem("")
         self.comboBox_3.addItem("")
         self.comboBox_3.addItem("")
-        self.textBrowser = QtWidgets.QTextBrowser(self.tab)
+        self.textBrowser = QtWidgets.QTextBrowser(self.USB)
         self.textBrowser.setGeometry(QtCore.QRect(180, 210, 271, 61))
         self.textBrowser.setObjectName("textBrowser")
-        self.textBrowser_2 = QtWidgets.QTextBrowser(self.tab)
+        self.textBrowser_2 = QtWidgets.QTextBrowser(self.USB)
         self.textBrowser_2.setGeometry(QtCore.QRect(180, 290, 271, 71))
         self.textBrowser_2.setObjectName("textBrowser_2")
-        self.label_5 = QtWidgets.QLabel(self.tab)
+        self.label_5 = QtWidgets.QLabel(self.USB)
         self.label_5.setGeometry(QtCore.QRect(180, 190, 91, 20))
         font = QtGui.QFont()
         font.setPointSize(8)
@@ -59,7 +57,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_5.setFont(font)
         self.label_5.setObjectName("label_5")
-        self.label_6 = QtWidgets.QLabel(self.tab)
+        self.label_6 = QtWidgets.QLabel(self.USB)
         self.label_6.setGeometry(QtCore.QRect(180, 270, 91, 20))
         font = QtGui.QFont()
         font.setPointSize(8)
@@ -67,32 +65,32 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.label_6.setFont(font)
         self.label_6.setObjectName("label_6")
-        self.tabWidget.addTab(self.tab, "")
-        self.tab_2 = QtWidgets.QWidget()
-        self.tab_2.setObjectName("tab_2")
-        self.label_3 = QtWidgets.QLabel(self.tab_2)
+        self.tabWidget.addTab(self.USB, "")
+        self.WiFi = QtWidgets.QWidget()
+        self.WiFi.setObjectName("WiFi")
+        self.label_3 = QtWidgets.QLabel(self.WiFi)
         self.label_3.setGeometry(QtCore.QRect(250, -20, 201, 171))
         self.label_3.setObjectName("label_3")
-        self.comboBox_2 = QtWidgets.QComboBox(self.tab_2)
+        self.comboBox_2 = QtWidgets.QComboBox(self.WiFi)
         self.comboBox_2.setGeometry(QtCore.QRect(10, 30, 91, 31))
         self.comboBox_2.setObjectName("comboBox_2")
         self.comboBox_2.addItem("")
         self.comboBox_2.addItem("")
-        self.pushButton_2 = QtWidgets.QPushButton(self.tab_2)
+        self.pushButton_2 = QtWidgets.QPushButton(self.WiFi)
         self.pushButton_2.setGeometry(QtCore.QRect(160, 280, 111, 61))
         self.pushButton_2.setObjectName("pushButton_2")
-        self.comboBox_4 = QtWidgets.QComboBox(self.tab_2)
+        self.comboBox_4 = QtWidgets.QComboBox(self.WiFi)
         self.comboBox_4.setGeometry(QtCore.QRect(120, 30, 131, 31))
         self.comboBox_4.setObjectName("comboBox_4")
         self.comboBox_4.addItem("")
         self.comboBox_4.addItem("")
         self.comboBox_4.addItem("")
-        self.listWidget_2 = QtWidgets.QListWidget(self.tab_2)
+        self.listWidget_2 = QtWidgets.QListWidget(self.WiFi)
         self.listWidget_2.setGeometry(QtCore.QRect(10, 90, 131, 251))
         self.listWidget_2.setObjectName("listWidget_2")
         item = QtWidgets.QListWidgetItem()
         self.listWidget_2.addItem(item)
-        self.tabWidget.addTab(self.tab_2, "")
+        self.tabWidget.addTab(self.WiFi, "")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setEnabled(True)
         self.label.setGeometry(QtCore.QRect(280, -60, 281, 131))
@@ -102,7 +100,7 @@ class Ui_MainWindow(object):
         self.label_4.setObjectName("label_4")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 500, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 500, 24))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -150,7 +148,7 @@ class Ui_MainWindow(object):
         self.comboBox_3.setItemText(2, _translate("MainWindow", "USB to WI-FI"))
         self.label_5.setText(_translate("MainWindow", "Transmit status"))
         self.label_6.setText(_translate("MainWindow", "Receive status"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.USB), _translate("MainWindow", "USB"))
         self.label_3.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/modes/dependences/WifiModelLogo.png\"/></p></body></html>"))
         self.comboBox_2.setItemText(0, _translate("MainWindow", "Loader Mode"))
         self.comboBox_2.setItemText(1, _translate("MainWindow", "Application mode"))
@@ -163,7 +161,7 @@ class Ui_MainWindow(object):
         item = self.listWidget_2.item(0)
         item.setText(_translate("MainWindow", "Get version 0x51"))
         self.listWidget_2.setSortingEnabled(__sortingEnabled)
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.WiFi), _translate("MainWindow", "WiFi"))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/Logo/dependences/9741ef35-9950-4396-9d31-0876fc97d6a3_200x200.png\"/></p></body></html>"))
         self.label_4.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/modes/dependences/MyNameLogo.png\"/></p></body></html>"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
@@ -172,9 +170,9 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionSettings.setText(_translate("MainWindow", "Settings"))
+
 import LogoLabel_rc
 import Usb_rc
-
 
 if __name__ == "__main__":
     import sys
@@ -184,3 +182,4 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>523</height>
+    <width>567</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,24 +19,24 @@
      <rect>
       <x>20</x>
       <y>80</y>
-      <width>471</width>
+      <width>541</width>
       <height>401</height>
      </rect>
     </property>
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="tab">
+    <widget class="QWidget" name="USB">
      <attribute name="title">
-      <string>Tab 1</string>
+      <string>USB</string>
      </attribute>
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>270</x>
+        <x>350</x>
         <y>0</y>
-        <width>201</width>
-        <height>201</height>
+        <width>241</width>
+        <height>191</height>
        </rect>
       </property>
       <property name="layoutDirection">
@@ -72,10 +72,10 @@
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>260</x>
         <y>90</y>
-        <width>111</width>
-        <height>61</height>
+        <width>131</width>
+        <height>51</height>
        </rect>
       </property>
       <property name="text">
@@ -87,15 +87,10 @@
        <rect>
         <x>10</x>
         <y>90</y>
-        <width>131</width>
+        <width>241</width>
         <height>261</height>
        </rect>
       </property>
-      <item>
-       <property name="text">
-        <string>Get version 0x51</string>
-       </property>
-      </item>
      </widget>
      <widget class="QComboBox" name="comboBox_3">
       <property name="geometry">
@@ -125,7 +120,7 @@
      <widget class="QTextBrowser" name="textBrowser">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>260</x>
         <y>210</y>
         <width>271</width>
         <height>61</height>
@@ -135,7 +130,7 @@
      <widget class="QTextBrowser" name="textBrowser_2">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>260</x>
         <y>290</y>
         <width>271</width>
         <height>71</height>
@@ -145,7 +140,7 @@
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>260</x>
         <y>190</y>
         <width>91</width>
         <height>20</height>
@@ -165,7 +160,7 @@
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>260</x>
         <y>270</y>
         <width>91</width>
         <height>20</height>
@@ -183,9 +178,9 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="WiFi">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>WiFi</string>
      </attribute>
      <widget class="QLabel" name="label_3">
       <property name="geometry">
@@ -310,8 +305,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>500</width>
-     <height>21</height>
+     <width>567</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
