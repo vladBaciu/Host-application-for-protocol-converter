@@ -8,10 +8,24 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
+FBL_GET_VERSION_CMD = "0x14"
+FBL_GET_HELP_CMD = "0x22"
+FBL_GET_CID_CMD = "0x44"
+FBL_GET_RDP_LEVEL_CMD = "0x25"
+FBL_GO_TO_ADDR_CMD = "0x19"
+FBL_ERASE_FLASH_CMD = "0x84"
+FBL_MEMORY_WRITE_CMD = "0x32"
+FBL_ENABLE_RW_PROTECTION_CMD = "0x3C"
+FBL_MEMORY_READ_CMD = "0x2B"
+FBL_READ_SECTOR_PROTECTION_STATUS_CMD = "0x78"
+FBL_READ_OTP_CMD = "0x1F"
+FBL_DISABLE_RW_PROTECTION_CMD = "0x6C"
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(567, 558)
+        MainWindow.setFixedSize(567, 558)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
@@ -174,8 +188,34 @@ class Ui_MainWindow(object):
         items = self.listWidget.selectedItems()
         self.textBrowser.clear()
         self.textBrowser.append(self.listWidget.currentItem().text())
-    
+        word_list = self.listWidget.currentItem().text().split()
         
+        if (FBL_GET_VERSION_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_GET_HELP_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_GET_CID_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_GET_RDP_LEVEL_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_GO_TO_ADDR_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_ERASE_FLASH_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_MEMORY_WRITE_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_ENABLE_RW_PROTECTION_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_MEMORY_READ_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_READ_SECTOR_PROTECTION_STATUS_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_READ_OTP_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+        elif (FBL_DISABLE_RW_PROTECTION_CMD == word_list[-1]):
+            self.textBrowser.append(word_list[-1])
+            
+                
     def CheckButton(self, MainWindow):
         self.pushButton.clicked.connect(self.SendCommand)
 
