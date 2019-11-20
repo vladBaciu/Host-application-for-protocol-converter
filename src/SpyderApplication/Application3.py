@@ -5,7 +5,7 @@
 # Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
-
+import serial
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -138,11 +138,12 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionAbout)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
-
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
+        self.actionExit.triggered.connect(self.exitCall)
+        self.actionSettings.triggered.connect(self.SettingsWindow)
+        
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -178,11 +179,22 @@ class Ui_MainWindow(object):
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionSettings.setText(_translate("MainWindow", "Settings"))
         
+    def exitCall(self):
+        print("Kill application....")
+        sys.exit()
+        
+    def SettingsWindow(self):
+        i=0
+        
     def ReadCommands(self, MainWindow):
+        self.listWidget.clear()
         self.listWidget.setStyleSheet("font: 8pt Comic Sans MS")
-        with open('SupportedCommands.txt','r') as commandsFile:
-            for commands in commandsFile:
-                self.listWidget.addItem(commands)
+        if (self.comboBox.currentIndex() == 0):
+            with open('SupportedCommands.txt','r') as commandsFile:
+                for commands in commandsFile:
+                    self.listWidget.addItem(commands)
+        else:
+                self.listWidget.clear()
                       
     def SendCommand(self, MainWindow):
         items = self.listWidget.selectedItems()
@@ -218,8 +230,33 @@ class Ui_MainWindow(object):
                 
     def CheckButton(self, MainWindow):
         self.pushButton.clicked.connect(self.SendCommand)
+    
+    def CommandTypeSelection(self,MainWindow):
+        self.comboBox.currentIndexChanged.connect(self.ReadCommands)
+    
 
 
+
+
+
+
+class HandlerClass:
+    def Send_Get_Help_Cmd():
+        i = 0
+    def Send_Get_Version_Cmd():
+        i = 0
+    def Send_Get_CID_Cmd():
+        i = 0
+    def Calculate_CRC(data):
+        i = 0
+    def Serial_Init():
+        i = 0
+    def Serial_Write(data):
+        i = 0
+    def Serial_Read():
+        i = 0
+    
+        
 
 import LogoLabel_rc
 import Usb_rc
@@ -232,6 +269,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     ui.ReadCommands(MainWindow)
     ui.CheckButton(MainWindow)
+    ui.CommandTypeSelection(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
 
