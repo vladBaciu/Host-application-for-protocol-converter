@@ -6,6 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 import serial
+import Settings
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -184,8 +185,11 @@ class Ui_MainWindow(object):
         sys.exit()
         
     def SettingsWindow(self):
-        i=0
-        
+       self.window = QtWidgets.QMainWindow()
+       self.ui = Settings.Ui_SettingsWindow()
+       self.ui.setupUi(self.window)
+       self.window.show()
+       
     def ReadCommands(self, MainWindow):
         self.listWidget.clear()
         self.listWidget.setStyleSheet("font: 8pt Comic Sans MS")
@@ -271,5 +275,5 @@ if __name__ == "__main__":
     ui.CheckButton(MainWindow)
     ui.CommandTypeSelection(MainWindow)
     MainWindow.show()
-    sys.exit(app.exec_())
+    app.exec_()
 
