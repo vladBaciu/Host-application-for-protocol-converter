@@ -23,6 +23,9 @@ FBL_READ_SECTOR_PROTECTION_STATUS_CMD = "0x78"
 FBL_READ_OTP_CMD = "0x1F"
 FBL_DISABLE_RW_PROTECTION_CMD = "0x6C"
 
+init_done = False
+
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -188,6 +191,9 @@ class Ui_MainWindow(object):
        self.window = QtWidgets.QMainWindow()
        self.ui = Settings.Ui_SettingsWindow()
        self.ui.setupUi(self.window)
+       self.ui.SearchForAvailableCOMS()
+       self.ui.ComSelection()
+       self.ui.BaudSelection()
        self.window.show()
        
     def ReadCommands(self, MainWindow):
@@ -238,7 +244,19 @@ class Ui_MainWindow(object):
     def CommandTypeSelection(self,MainWindow):
         self.comboBox.currentIndexChanged.connect(self.ReadCommands)
     
-
+    
+    def CommandTypeSelection(self,MainWindow):
+        self.comboBox.currentIndexChanged.connect(self.ReadCommands)
+        
+    def InitSerialCommunication(self):
+        serialComm = serial.Serial()
+        self.window = QtWidgets.QMainWindow()
+        self.ui = Settings.Ui_SettingsWindow()
+        self.ui.setupUi(self.window)
+        serialComm.baudrate = self.ui.GetBaudRate()
+#       serialComm.port = self.ui.GetComName()
+        print(self.ui.GetBaudRate())
+       
 
 
 
@@ -267,7 +285,9 @@ import Usb_rc
 
 if __name__ == "__main__":
     import sys
-    app = QtWidgets.QApplication(sys.argv)
+    app = QtCore.QCoreApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)

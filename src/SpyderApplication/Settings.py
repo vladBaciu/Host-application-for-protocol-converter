@@ -5,7 +5,8 @@
 # Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
-
+import serial.tools.list_ports
+import Application3
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_SettingsWindow(object):
@@ -17,6 +18,8 @@ class Ui_SettingsWindow(object):
         self.comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox.setGeometry(QtCore.QRect(10, 30, 81, 22))
         self.comboBox.setObjectName("comboBox")
+        self.comboBox.addItem("Unselect")
+        self.comboBox.setCurrentIndex(0)
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(20, 10, 91, 16))
         font = QtGui.QFont()
@@ -29,7 +32,7 @@ class Ui_SettingsWindow(object):
         self.BaudRateSlider.setMaximum(4)
         self.BaudRateSlider.setPageStep(4)
         self.BaudRateSlider.setProperty("value", 4)
-        self.BaudRateSlider.setSliderPosition(4)
+        self.BaudRateSlider.setSliderPosition(1)
         self.BaudRateSlider.setOrientation(QtCore.Qt.Vertical)
         self.BaudRateSlider.setObjectName("BaudRateSlider")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
@@ -88,7 +91,6 @@ class Ui_SettingsWindow(object):
         self.statusbar = QtWidgets.QStatusBar(SettingsWindow)
         self.statusbar.setObjectName("statusbar")
         SettingsWindow.setStatusBar(self.statusbar)
-
         self.retranslateUi(SettingsWindow)
         QtCore.QMetaObject.connectSlotsByName(SettingsWindow)
 
@@ -102,14 +104,50 @@ class Ui_SettingsWindow(object):
         self.label_5.setText(_translate("SettingsWindow", "115200"))
         self.label_6.setText(_translate("SettingsWindow", "4800"))
         self.label_7.setText(_translate("SettingsWindow", "BAUD RATE"))
-
-
+        
+    def SearchForAvailableCOMS(self):
+    
+        for p in serial.tools.list_ports.comports():
+            self.comboBox.addItem(p.device)
+            
+            
+            
+    
+    def GetBaudRate(self):
+        if (self.BaudRateSlider.value() == 0):
+            return 4800
+        elif (self.BaudRateSlider.value() == 1):
+            return 9600
+        elif (self.BaudRateSlider.value() == 1):
+            return 14400
+        elif (self.BaudRateSlider.value() == 1):
+            return 19200
+        elif (self.BaudRateSlider.value() == 1):
+            return 115200
+        
+    def GetComName(self):
+      if (self.comboBox.currentIndex() == 0):
+          return 0
+      elif (self.comboBox.currentIndex() == 1):
+          return 1
+      else:
+          return -1
+        
+    def ComSelection(self):
+        self.ui = Application3.Ui_MainWindow()
+        self.comboBox.currentIndexChanged.connect(self.ui.InitSerialCommunication)
+    def BaudSelection(self):
+        self.ui = Application3.Ui_MainWindow()
+        self.BaudRateSlider.valueChanged.connect(self.ui.InitSerialCommunication)    
 if __name__ == "__main__":
     import sys
-    app = QtWidgets.QApplication(sys.argv)
+    app = QtCore.QCoreApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv)
     SettingsWindow = QtWidgets.QMainWindow()
     ui = Ui_SettingsWindow()
     ui.setupUi(SettingsWindow)
+    ui.SearchForAvailableCOMS()
     SettingsWindow.show()
-    sys.exit(app.exec_())
+    app.exec_()
 
