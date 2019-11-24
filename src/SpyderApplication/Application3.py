@@ -188,13 +188,15 @@ class Ui_MainWindow(object):
         sys.exit()
         
     def SettingsWindow(self):
+       
+
        self.window = QtWidgets.QMainWindow()
        self.ui = Settings.Ui_SettingsWindow()
        self.ui.setupUi(self.window)
-       self.ui.SearchForAvailableCOMS()
-       self.ui.ComSelection()
-       self.ui.BaudSelection()
+       self.ui.ReadInitFile()
+       self.ui.CheckButton()
        self.window.show()
+       
        
     def ReadCommands(self, MainWindow):
         self.listWidget.clear()
