@@ -200,10 +200,7 @@ class Ui_MainWindow(object):
        self.ui = Settings.Ui_SettingsWindow()
        self.ui.setupUi(self.window)
        self.ui.ReadInitFile()
-       
        self.ui.CheckButton()
-       self.InitSerialCommunication()
-           
        self.window.show()
        
        
@@ -223,6 +220,12 @@ class Ui_MainWindow(object):
         self.textBrowser.append(self.listWidget.currentItem().text())
         word_list = self.listWidget.currentItem().text().split()
         
+        global detectChanges
+        if Settings.detectChanges is True:
+            serialComHandler.close()
+            self.InitSerialCommunication()
+            Settings.detectChanges = False
+            
         if (FBL_GET_VERSION_CMD == word_list[-1]):
             self.textBrowser.append(word_list[-1])
         elif (FBL_GET_HELP_CMD == word_list[-1]):
@@ -285,9 +288,10 @@ class Ui_MainWindow(object):
                     print ("COM port opened")
                     serialComm.write(b'Hello')
                     init_done = True
+                  
         except:
                 print("Check communication port and other settings")
-       
+        
         
 #       serialComm.port) = self.ui.GetComName()
       
@@ -329,7 +333,6 @@ if __name__ == "__main__":
     ui.ReadCommands(MainWindow)
     ui.CheckButton(MainWindow)
     ui.CommandTypeSelection(MainWindow)
-    ui.InitSerialCommunication()
     MainWindow.show()
     app.exec_()
 

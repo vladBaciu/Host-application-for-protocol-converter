@@ -8,7 +8,7 @@
 
 import Application3
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+detectChanges = False
 class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         SettingsWindow.setObjectName("SettingsWindow")
@@ -49,6 +49,8 @@ class Ui_SettingsWindow(object):
              self.textEdit.append(content)
              
     def WriteToFile(self):
+         global detectChanges;
+         detectChanges = True;
          with open('InitFile.ini','w') as commandsFile:
              content = self.textEdit.toPlainText()
              commandsFile.write(content)
