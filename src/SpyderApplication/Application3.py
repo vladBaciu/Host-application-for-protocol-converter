@@ -6,6 +6,12 @@
 #
 # WARNING! All changes made in this file will be lost!
 import serial
+
+saveHandler = False
+init_done = False
+serialCOM = "";
+baudRate = "";
+serialComHandler = serial.Serial()
 import Settings
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -23,7 +29,6 @@ FBL_READ_SECTOR_PROTECTION_STATUS_CMD = "0x78"
 FBL_READ_OTP_CMD = "0x1F"
 FBL_DISABLE_RW_PROTECTION_CMD = "0x6C"
 
-init_done = False
 
 
 class Ui_MainWindow(object):
@@ -185,6 +190,7 @@ class Ui_MainWindow(object):
         
     def exitCall(self):
         print("Kill application....")
+        serialComHandler.close()
         sys.exit()
         
     def SettingsWindow(self):
@@ -194,7 +200,10 @@ class Ui_MainWindow(object):
        self.ui = Settings.Ui_SettingsWindow()
        self.ui.setupUi(self.window)
        self.ui.ReadInitFile()
+       
        self.ui.CheckButton()
+       self.InitSerialCommunication()
+           
        self.window.show()
        
        
@@ -249,15 +258,39 @@ class Ui_MainWindow(object):
     
     def CommandTypeSelection(self,MainWindow):
         self.comboBox.currentIndexChanged.connect(self.ReadCommands)
-        
+    
+    def ParseInitFile(self):
+         global serialCOM 
+         global baudRate
+         with open('InitFile.ini','r') as commandsFile:
+             serialCOM = commandsFile.readlines()[1][12:16]
+             commandsFile.seek(0)
+             baudRate = commandsFile.readlines()[2]
+             baudRate = baudRate.split('"')[1]
+             
     def InitSerialCommunication(self):
-        serialComm = serial.Serial()
-        self.window = QtWidgets.QMainWindow()
-        self.ui = Settings.Ui_SettingsWindow()
-        self.ui.setupUi(self.window)
-        serialComm.baudrate = self.ui.GetBaudRate()
-#       serialComm.port = self.ui.GetComName()
-        print(self.ui.GetBaudRate())
+        global serialComHandler
+        global init_done
+        print ("CALL")
+        self.ParseInitFile()
+      
+        try:
+                serialComHandler.close()
+                serialComm = serial.Serial()
+                serialComm.baudrate = baudRate
+                serialComm.port = serialCOM
+                serialComm.open()
+                serialComHandler = serialComm
+                if serialComm.is_open is True:
+                    print ("COM port opened")
+                    serialComm.write(b'Hello')
+                    init_done = True
+        except:
+                print("Check communication port and other settings")
+       
+        
+#       serialComm.port) = self.ui.GetComName()
+      
        
 
 
@@ -296,6 +329,7 @@ if __name__ == "__main__":
     ui.ReadCommands(MainWindow)
     ui.CheckButton(MainWindow)
     ui.CommandTypeSelection(MainWindow)
+    ui.InitSerialCommunication()
     MainWindow.show()
     app.exec_()
 

@@ -6,6 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import Application3
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_SettingsWindow(object):
@@ -55,7 +56,7 @@ class Ui_SettingsWindow(object):
              
     def CheckButton(self):
         self.pushButton.clicked.connect(self.WriteToFile)
-        
+      
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
