@@ -216,40 +216,45 @@ class Ui_MainWindow(object):
                       
     def SendCommand(self, MainWindow):
         items = self.listWidget.selectedItems()
-        self.textBrowser.clear()
-        self.textBrowser.append(self.listWidget.currentItem().text())
-        word_list = self.listWidget.currentItem().text().split()
-        
-        global detectChanges
-        if Settings.detectChanges is True:
-            serialComHandler.close()
-            self.InitSerialCommunication()
-            Settings.detectChanges = False
+        if items:
+            self.textBrowser.clear()
+            self.textBrowser.append(self.listWidget.currentItem().text())
+            word_list = self.listWidget.currentItem().text().split()
             
-        if (FBL_GET_VERSION_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_GET_HELP_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_GET_CID_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_GET_RDP_LEVEL_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_GO_TO_ADDR_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_ERASE_FLASH_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_MEMORY_WRITE_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_ENABLE_RW_PROTECTION_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_MEMORY_READ_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_READ_SECTOR_PROTECTION_STATUS_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_READ_OTP_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
-        elif (FBL_DISABLE_RW_PROTECTION_CMD == word_list[-1]):
-            self.textBrowser.append(word_list[-1])
+            global detectChanges
+            if Settings.detectChanges is True:
+                serialComHandler.close()
+                self.InitSerialCommunication()
+                Settings.detectChanges = False
+                
+            if (FBL_GET_VERSION_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+                
+            elif (FBL_GET_HELP_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_GET_CID_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_GET_RDP_LEVEL_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_GO_TO_ADDR_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_ERASE_FLASH_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_MEMORY_WRITE_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_ENABLE_RW_PROTECTION_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_MEMORY_READ_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_READ_SECTOR_PROTECTION_STATUS_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_READ_OTP_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            elif (FBL_DISABLE_RW_PROTECTION_CMD == word_list[-1]):
+                self.textBrowser.append(word_list[-1])
+            
+            
+        
             
                 
     def CheckButton(self, MainWindow):
@@ -300,23 +305,9 @@ class Ui_MainWindow(object):
 
 
 
+def GetVersion():
+    i = 0
 
-class HandlerClass:
-    def Send_Get_Help_Cmd():
-        i = 0
-    def Send_Get_Version_Cmd():
-        i = 0
-    def Send_Get_CID_Cmd():
-        i = 0
-    def Calculate_CRC(data):
-        i = 0
-    def Serial_Init():
-        i = 0
-    def Serial_Write(data):
-        i = 0
-    def Serial_Read():
-        i = 0
-    
         
 
 import LogoLabel_rc
