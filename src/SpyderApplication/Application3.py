@@ -6,6 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 import serial
+import struct
 
 saveHandler = False
 init_done = False
@@ -232,26 +233,37 @@ class Ui_MainWindow(object):
                 
             elif (FBL_GET_HELP_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_GET_CID_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_GET_RDP_LEVEL_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_GO_TO_ADDR_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_ERASE_FLASH_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_MEMORY_WRITE_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_ENABLE_RW_PROTECTION_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_MEMORY_READ_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_READ_SECTOR_PROTECTION_STATUS_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_READ_OTP_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             elif (FBL_DISABLE_RW_PROTECTION_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
+                
             
             
         
@@ -302,11 +314,141 @@ class Ui_MainWindow(object):
       
        
 
+#------------------------------COMMON-----------------------------------------
+def word_to_byte(addr, index , lowerfirst):
+    value = (addr >> ( 8 * ( index -1)) & 0x000000FF )
+    return value
+
+def get_crc(buff, length):
+    Crc = 0xFFFFFFFF
+    #print(length)
+    for data in buff[0:length]:
+        Crc = Crc ^ data
+        for i in range(32):
+            if(Crc & 0x80000000):
+                Crc = (Crc << 1) ^ 0x04C11DB7
+            else:
+                Crc = (Crc << 1)
+    return Crc
+#-----------------------------------------------------------------------------
+
+#----------------------------SERIAL-------------------------------------------
+def read_serial_port(length):
+    read_value = serialComHandler.read(length)
+    return read_value
+
+def Close_serial_port():
+    pass
+def purge_serial_port():
+    serialComHandler.reset_input_buffer()
+    
+def Write_to_serial_port(value, *length):
+        data = struct.pack('>B', value)
+        value = bytearray(data)
+        print("   "+"0x{:02x}".format(value[0]),end=' ')
+        serialComHandler.write(data)
 
 
 
-def GetVersion():
-    i = 0
+
+#-----------------------------------------------------------------------------
+
+#----------------------------HANDLE-------------------------------------------
+def read_bootloader_reply(command_code):
+    #ack=[0,0]
+    len_to_follow=0 
+    ret = -2 
+
+    #read_serial_port(ack,2)
+    #ack = ser.read(2)
+    ack=read_serial_port(2)
+    if(len(ack) ):
+        a_array=bytearray(ack)
+        #print("read uart:",ack) 
+        if (a_array[0]== 0xA5):
+            #CRC of last command was good .. received ACK and "len to follow"
+            len_to_follow=a_array[1]
+            print("\n   CRC : SUCCESS Len :",len_to_follow)
+            #print("command_code:",hex(command_code))
+            if (command_code) == FBL_GET_VERSION_CMD :
+                Receive_GetVersion(len_to_follow)
+                
+#            elif(command_code) == FBL_GET_HELP_CMD:
+               # process_COMMAND_BL_GET_HELP(len_to_follow)
+                
+#            elif(command_code) == COMMAND_BL_GET_CID:
+#                process_COMMAND_BL_GET_CID(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_GET_RDP_STATUS:
+#                process_COMMAND_BL_GET_RDP_STATUS(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_GO_TO_ADDR:
+#                process_COMMAND_BL_GO_TO_ADDR(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_FLASH_ERASE:
+#                process_COMMAND_BL_FLASH_ERASE(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_MEM_WRITE:
+#                process_COMMAND_BL_MEM_WRITE(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_READ_SECTOR_P_STATUS:
+#                process_COMMAND_BL_READ_SECTOR_STATUS(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_EN_R_W_PROTECT:
+#                process_COMMAND_BL_EN_R_W_PROTECT(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_DIS_R_W_PROTECT:
+#                process_COMMAND_BL_DIS_R_W_PROTECT(len_to_follow)
+#                
+#            elif(command_code) == COMMAND_BL_MY_NEW_COMMAND:
+#                process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
+#                
+            else:
+                print("\n   Invalid command code\n")
+                
+            ret = 0
+         
+        elif a_array[0] == 0x7F:
+            #CRC of last command was bad .. received NACK
+            print("\n   CRC: FAIL \n")
+            ret= -1
+    else:
+        print("\n   Timeout : Bootloader not responding")
+        
+    return ret
+
+def decode_menu_command_code(command):
+    ret_value = 0
+    data_buf = []
+    for i in range(255):
+        data_buf.append(0)
+    
+    if(command  == 0 ):
+        print("\n   Exiting...!")
+        raise SystemExit
+    elif(command == 1):
+        print("\n   Command == > BL_GET_VER")
+        COMMAND_BL_GET_VER_LEN              = 6
+        data_buf[0] = COMMAND_BL_GET_VER_LEN-1 
+        data_buf[1] = FBL_GET_VERSION_CMD 
+        crc32       = get_crc(data_buf,COMMAND_BL_GET_VER_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+
+        
+        Write_to_serial_port(data_buf[0],1)
+        for i in data_buf[1:COMMAND_BL_GET_VER_LEN]:
+            Write_to_serial_port(i,COMMAND_BL_GET_VER_LEN-1)
+        
+
+        ret_value = read_bootloader_reply(data_buf[1])
+
+
+
+#-----------------------------------------------------------------------------
 
         
 
