@@ -8,6 +8,8 @@
 import serial
 import struct
 import os
+import threading
+
 saveHandler = False
 init_done = False
 stillConnected = False
@@ -383,17 +385,18 @@ def Write_to_serial_port(self,value, *length):
 #-----------------------------------------------------------------------------
 
 #----------------------------HANDLE-------------------------------------------
-def read_bootloader_reply(command_code):
+def read_bootloader_reply(self,command_code):
     #ack=[0,0]
     len_to_follow=0 
     ret = -2 
 
     #read_serial_port(ack,2)
     #ack = ser.read(2)
-    ack=read_serial_port(2)
-    if(len(ack) ):
+    ack=read_serial_port(10)
+    if(len(ack)):
         a_array=bytearray(ack)
-        #print("read uart:",ack) 
+        self.textBrowser_2.clear()
+        self.textBrowser_2.append("Dummy data received")
         if (a_array[0]== 0xA5):
             #CRC of last command was good .. received ACK and "len to follow"
             len_to_follow=a_array[1]
@@ -442,8 +445,15 @@ def read_bootloader_reply(command_code):
             print("\n   CRC: FAIL \n")
             ret= -1
     else:
-        print("\n   Timeout : Bootloader not responding")
-        
+         
+          myFont=QtGui.QFont()
+          myFont.setBold(True)
+          color= QtGui.QPalette()
+          color.setColor(QtGui.QPalette.Text, QtCore.Qt.red)
+          self.textBrowser_2.setPalette(color)
+          self.textBrowser_2.setFont(myFont)
+          self.textBrowser_2.clear()
+          self.textBrowser_2.append("Timeout : Bootloader not responding")
     return ret
 
 def HandleCommands(self,command):
@@ -471,8 +481,8 @@ def HandleCommands(self,command):
         for i in data_buf[1:FBL_COMMAND_BL_GET_VER_LEN]:
             Write_to_serial_port(self,i,FBL_COMMAND_BL_GET_VER_LEN-1)
         
-
-        #ret_value = read_bootloader_reply(data_buf[1])
+        serialComHandler.timeout = 0.3;
+        retValue = read_bootloader_reply(self,data_buf[1])
 
 
 
