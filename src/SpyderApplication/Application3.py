@@ -7,9 +7,10 @@
 # WARNING! All changes made in this file will be lost!
 import serial
 import struct
-
+import os
 saveHandler = False
 init_done = False
+stillConnected = False
 serialCOM = "";
 baudRate = "";
 serialComHandler = serial.Serial()
@@ -18,6 +19,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 FBL_GET_VERSION_CMD = "0x14"
+FBL_INTERNAL_GET_VERSION_CMD = 1
 FBL_GET_HELP_CMD = "0x22"
 FBL_GET_CID_CMD = "0x44"
 FBL_GET_RDP_LEVEL_CMD = "0x25"
@@ -217,7 +219,7 @@ class Ui_MainWindow(object):
                       
     def SendCommand(self, MainWindow):
         items = self.listWidget.selectedItems()
-        if items:
+        if items and stillConnected:
             self.textBrowser.clear()
             self.textBrowser.append(self.listWidget.currentItem().text())
             word_list = self.listWidget.currentItem().text().split()
@@ -229,8 +231,8 @@ class Ui_MainWindow(object):
                 Settings.detectChanges = False
                 
             if (FBL_GET_VERSION_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_GET_VERSION_CMD)
             elif (FBL_GET_HELP_CMD == word_list[-1]):
                 self.textBrowser.append(word_list[-1])
                 
@@ -291,7 +293,8 @@ class Ui_MainWindow(object):
     def InitSerialCommunication(self):
         global serialComHandler
         global init_done
-        print ("CALL")
+        global stillConnected
+        #print ("CALL")
         self.ParseInitFile()
       
         try:
@@ -302,12 +305,30 @@ class Ui_MainWindow(object):
                 serialComm.open()
                 serialComHandler = serialComm
                 if serialComm.is_open is True:
-                    print ("COM port opened")
-                    serialComm.write(b'Hello')
+                    font=QtGui.QFont()
+                    font.setBold(True)
+                    color= QtGui.QPalette()
+                    color.setColor(QtGui.QPalette.Text, QtCore.Qt.green)
+                    self.textBrowser_2.setPalette(color)
+                    self.textBrowser_2.setFont(font)
+                    self.textBrowser_2.clear()
+                    self.textBrowser.clear()
+                    self.textBrowser_2.append("COM port opened")
+                    #serialComm.write(b'Hello')
                     init_done = True
+                    stillConnected = True
                   
         except:
-                print("Check communication port and other settings")
+                stillConnected = False
+                myFont=QtGui.QFont()
+                myFont.setBold(True)
+                color= QtGui.QPalette()
+                color.setColor(QtGui.QPalette.Text, QtCore.Qt.red)
+                self.textBrowser_2.setPalette(color)
+                self.textBrowser_2.setFont(myFont)
+                self.textBrowser_2.clear()
+                self.textBrowser.clear()
+                self.textBrowser_2.append("Error: Check communication port and other settings")
         
         
 #       serialComm.port) = self.ui.GetComName()
@@ -342,10 +363,18 @@ def Close_serial_port():
 def purge_serial_port():
     serialComHandler.reset_input_buffer()
     
-def Write_to_serial_port(value, *length):
+def Write_to_serial_port(self,value, *length):
+    if stillConnected:
         data = struct.pack('>B', value)
         value = bytearray(data)
-        print("   "+"0x{:02x}".format(value[0]),end=' ')
+        output = "0x{:02x}".format(value[0])
+        myFont=QtGui.QFont()
+        myFont.setBold(True)
+        color= QtGui.QPalette()
+        color.setColor(QtGui.QPalette.Text, QtCore.Qt.black)
+        self.textBrowser.setPalette(color)
+        self.textBrowser.setFont(myFont)
+        self.textBrowser.setText(self.textBrowser.toPlainText() + " " + output)
         serialComHandler.write(data)
 
 
@@ -371,8 +400,8 @@ def read_bootloader_reply(command_code):
             print("\n   CRC : SUCCESS Len :",len_to_follow)
             #print("command_code:",hex(command_code))
             if (command_code) == FBL_GET_VERSION_CMD :
-                Receive_GetVersion(len_to_follow)
-                
+                #Receive_GetVersion(len_to_follow)
+                a = 0
 #            elif(command_code) == FBL_GET_HELP_CMD:
                # process_COMMAND_BL_GET_HELP(len_to_follow)
                 
@@ -417,21 +446,20 @@ def read_bootloader_reply(command_code):
         
     return ret
 
-def decode_menu_command_code(command):
+def HandleCommands(self,command):
     ret_value = 0
     data_buf = []
     for i in range(255):
         data_buf.append(0)
     
     if(command  == 0 ):
-        print("\n   Exiting...!")
         raise SystemExit
     elif(command == 1):
-        print("\n   Command == > BL_GET_VER")
-        COMMAND_BL_GET_VER_LEN              = 6
-        data_buf[0] = COMMAND_BL_GET_VER_LEN-1 
-        data_buf[1] = FBL_GET_VERSION_CMD 
-        crc32       = get_crc(data_buf,COMMAND_BL_GET_VER_LEN-4)
+        #print("\n   Command == > BL_GET_VER")
+        FBL_COMMAND_BL_GET_VER_LEN              = 6
+        data_buf[0] = FBL_COMMAND_BL_GET_VER_LEN-1 
+        data_buf[1] = int(FBL_GET_VERSION_CMD,16) 
+        crc32       = get_crc(data_buf,FBL_COMMAND_BL_GET_VER_LEN-4)
         crc32 = crc32 & 0xffffffff
         data_buf[2] = word_to_byte(crc32,1,1) 
         data_buf[3] = word_to_byte(crc32,2,1) 
@@ -439,12 +467,12 @@ def decode_menu_command_code(command):
         data_buf[5] = word_to_byte(crc32,4,1) 
 
         
-        Write_to_serial_port(data_buf[0],1)
-        for i in data_buf[1:COMMAND_BL_GET_VER_LEN]:
-            Write_to_serial_port(i,COMMAND_BL_GET_VER_LEN-1)
+        Write_to_serial_port(self,data_buf[0],1)
+        for i in data_buf[1:FBL_COMMAND_BL_GET_VER_LEN]:
+            Write_to_serial_port(self,i,FBL_COMMAND_BL_GET_VER_LEN-1)
         
 
-        ret_value = read_bootloader_reply(data_buf[1])
+        #ret_value = read_bootloader_reply(data_buf[1])
 
 
 
@@ -465,6 +493,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     ui.ReadCommands(MainWindow)
     ui.CheckButton(MainWindow)
+    ui.InitSerialCommunication()
     ui.CommandTypeSelection(MainWindow)
     MainWindow.show()
     app.exec_()
