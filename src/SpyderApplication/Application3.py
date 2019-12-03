@@ -411,6 +411,7 @@ def read_bootloader_reply(self,command_code):
         a_array=bytearray(ack)
         self.textBrowser_2.clear()
         self.textBrowser_2.append("Dummy data received")
+        
         print(ack)
         if (a_array[0]== 0xA5):
             #CRC of last command was good .. received ACK and "len to follow"
@@ -454,7 +455,14 @@ def read_bootloader_reply(self,command_code):
                 #process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
                 a = 0
             else:
-                print("\n   Invalid command code\n")
+                myFont=QtGui.QFont()
+                myFont.setBold(True)
+                color= QtGui.QPalette()
+                color.setColor(QtGui.QPalette.Text, QtCore.Qt.red)
+                self.textBrowser_2.setPalette(color)
+                self.textBrowser_2.setFont(myFont)
+                self.textBrowser_2.clear()
+                self.textBrowser_2.append(" Invalid command code. ")
                 
             ret = 0
          
