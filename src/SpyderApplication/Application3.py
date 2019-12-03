@@ -23,17 +23,27 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 FBL_GET_VERSION_CMD = "0x14"
 FBL_INTERNAL_GET_VERSION_CMD = 1
 FBL_GET_HELP_CMD = "0x22"
+FBL_INTERNAL_GET_HELP_CMD = 2
 FBL_GET_CID_CMD = "0x44"
+FBL_INTERNAL_GET_CID_CMD = 3
 FBL_GET_RDP_LEVEL_CMD = "0x25"
+FBL_INTERNAL_GET_RDP_LEVEL_CMD = 4
 FBL_GO_TO_ADDR_CMD = "0x19"
+FBL_INTERNAL_GO_TO_ADDR_CMD = 5
 FBL_ERASE_FLASH_CMD = "0x84"
+FBL_INTERNAL_ERASE_FLASH_CMD= 6
 FBL_MEMORY_WRITE_CMD = "0x32"
+FBL_INTERNAL_MEMORY_WRITE_CMD = 7
 FBL_ENABLE_RW_PROTECTION_CMD = "0x3C"
+FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD = 8
 FBL_MEMORY_READ_CMD = "0x2B"
+FBL_INTERNAL_MEMORY_READ_CMD = 9
 FBL_READ_SECTOR_PROTECTION_STATUS_CMD = "0x78"
+FBL_INTERNAL_READ_SECTOR_PROTECTION_STATUS_CMD = 10
 FBL_READ_OTP_CMD = "0x1F"
+FBL_INTERNAL_READ_OTP_CMD = 11
 FBL_DISABLE_RW_PROTECTION_CMD = "0x6C"
-
+FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD = 12
 
 
 class Ui_MainWindow(object):
@@ -236,38 +246,40 @@ class Ui_MainWindow(object):
                 #self.textBrowser.append(word_list[-1])
                 HandleCommands(self,FBL_INTERNAL_GET_VERSION_CMD)
             elif (FBL_GET_HELP_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_GET_HELP_CMD)
             elif (FBL_GET_CID_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_GET_CID_CMD)
             elif (FBL_GET_RDP_LEVEL_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_GET_RDP_LEVEL_CMD)
             elif (FBL_GO_TO_ADDR_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_GO_TO_ADDR_CMD)
             elif (FBL_ERASE_FLASH_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_ERASE_FLASH_CMD)
             elif (FBL_MEMORY_WRITE_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_MEMORY_WRITE_CMD)
             elif (FBL_ENABLE_RW_PROTECTION_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD)
             elif (FBL_MEMORY_READ_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_MEMORY_READ_CMD)
             elif (FBL_READ_SECTOR_PROTECTION_STATUS_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_READ_SECTOR_PROTECTION_STATUS_CMD)
             elif (FBL_READ_OTP_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_READ_OTP_CMD)
             elif (FBL_DISABLE_RW_PROTECTION_CMD == word_list[-1]):
-                self.textBrowser.append(word_list[-1])
-                
+                #self.textBrowser.append(word_list[-1])
+                HandleCommands(self,FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD) 
+            else:
+                HandleCommands(self,0) 
             
             
         
@@ -365,7 +377,7 @@ def Close_serial_port():
 def purge_serial_port():
     serialComHandler.reset_input_buffer()
     
-def Write_to_serial_port(self,value, *length):
+def Write_to_serial_port(self,value):
     if stillConnected:
         data = struct.pack('>B', value)
         value = bytearray(data)
@@ -378,6 +390,8 @@ def Write_to_serial_port(self,value, *length):
         self.textBrowser.setFont(myFont)
         self.textBrowser.setText(self.textBrowser.toPlainText() + " " + output)
         serialComHandler.write(data)
+        print("send")
+        
 
 
 
@@ -392,49 +406,53 @@ def read_bootloader_reply(self,command_code):
 
     #read_serial_port(ack,2)
     #ack = ser.read(2)
-    ack=read_serial_port(10)
+    ack=read_serial_port(20)
     if(len(ack)):
         a_array=bytearray(ack)
         self.textBrowser_2.clear()
         self.textBrowser_2.append("Dummy data received")
+        print(ack)
         if (a_array[0]== 0xA5):
             #CRC of last command was good .. received ACK and "len to follow"
             len_to_follow=a_array[1]
             print("\n   CRC : SUCCESS Len :",len_to_follow)
             #print("command_code:",hex(command_code))
-            if (command_code) == FBL_GET_VERSION_CMD :
+            if (command_code == FBL_GET_VERSION_CMD) :
                 #Receive_GetVersion(len_to_follow)
                 a = 0
-#            elif(command_code) == FBL_GET_HELP_CMD:
+            elif(command_code == FBL_GET_HELP_CMD):
                # process_COMMAND_BL_GET_HELP(len_to_follow)
-                
-#            elif(command_code) == COMMAND_BL_GET_CID:
-#                process_COMMAND_BL_GET_CID(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_GET_RDP_STATUS:
-#                process_COMMAND_BL_GET_RDP_STATUS(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_GO_TO_ADDR:
-#                process_COMMAND_BL_GO_TO_ADDR(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_FLASH_ERASE:
-#                process_COMMAND_BL_FLASH_ERASE(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_MEM_WRITE:
-#                process_COMMAND_BL_MEM_WRITE(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_READ_SECTOR_P_STATUS:
-#                process_COMMAND_BL_READ_SECTOR_STATUS(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_EN_R_W_PROTECT:
-#                process_COMMAND_BL_EN_R_W_PROTECT(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_DIS_R_W_PROTECT:
-#                process_COMMAND_BL_DIS_R_W_PROTECT(len_to_follow)
-#                
-#            elif(command_code) == COMMAND_BL_MY_NEW_COMMAND:
-#                process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
-#                
+               a = 0 
+            elif(command_code == FBL_GET_CID_CMD):
+               # process_COMMAND_BL_GET_CID(len_to_follow)
+               a = 0
+            elif(command_code == FBL_GET_RDP_LEVEL_CMD):
+                #process_COMMAND_BL_GET_RDP_STATUS(len_to_follow)
+                a = 0
+            elif(command_code == FBL_GO_TO_ADDR_CMD):
+               # process_COMMAND_BL_GO_TO_ADDR(len_to_follow)
+                a = 0
+            elif(command_code == FBL_ERASE_FLASH_CMD):
+                #process_COMMAND_BL_FLASH_ERASE(len_to_follow)
+                a = 0
+            elif(command_code == FBL_MEMORY_WRITE_CMD):
+                #process_COMMAND_BL_MEM_WRITE(len_to_follow)
+                a = 0
+            elif(command_code == FBL_ENABLE_RW_PROTECTION_CMD):
+                #process_COMMAND_BL_READ_SECTOR_STATUS(len_to_follow)
+                a = 0
+            elif(command_code == FBL_MEMORY_READ_CMD):
+                #process_COMMAND_BL_EN_R_W_PROTECT(len_to_follow)
+                a = 0
+            elif(command_code == FBL_READ_SECTOR_PROTECTION_STATUS_CMD):
+                #process_COMMAND_BL_DIS_R_W_PROTECT(len_to_follow)
+                a = 0
+            elif(command_code == FBL_READ_OTP_CMD):
+                #process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
+                a = 0
+            elif(command_code == FBL_DISABLE_RW_PROTECTION_CMD):
+                #process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
+                a = 0
             else:
                 print("\n   Invalid command code\n")
                 
@@ -442,7 +460,14 @@ def read_bootloader_reply(self,command_code):
          
         elif a_array[0] == 0x7F:
             #CRC of last command was bad .. received NACK
-            print("\n   CRC: FAIL \n")
+            myFont=QtGui.QFont()
+            myFont.setBold(True)
+            color= QtGui.QPalette()
+            color.setColor(QtGui.QPalette.Text, QtCore.Qt.red)
+            self.textBrowser_2.setPalette(color)
+            self.textBrowser_2.setFont(myFont)
+            self.textBrowser_2.clear()
+            self.textBrowser_2.append(" CRC: FAIL ")
             ret= -1
     else:
          
@@ -457,14 +482,14 @@ def read_bootloader_reply(self,command_code):
     return ret
 
 def HandleCommands(self,command):
-    ret_value = 0
+    retValue = 0
     data_buf = []
     for i in range(255):
         data_buf.append(0)
-    
+    serialComHandler.timeout = 0.3;
     if(command  == 0 ):
         raise SystemExit
-    elif(command == 1):
+    elif(command == FBL_INTERNAL_GET_VERSION_CMD):
         #print("\n   Command == > BL_GET_VER")
         FBL_COMMAND_BL_GET_VER_LEN              = 6
         data_buf[0] = FBL_COMMAND_BL_GET_VER_LEN-1 
@@ -477,13 +502,34 @@ def HandleCommands(self,command):
         data_buf[5] = word_to_byte(crc32,4,1) 
 
         
-        Write_to_serial_port(self,data_buf[0],1)
-        for i in data_buf[1:FBL_COMMAND_BL_GET_VER_LEN]:
-            Write_to_serial_port(self,i,FBL_COMMAND_BL_GET_VER_LEN-1)
         
-        serialComHandler.timeout = 0.3;
+        for i in data_buf[0:FBL_COMMAND_BL_GET_VER_LEN]:
+            print(hex(i))
+            Write_to_serial_port(self,i)
+         
         retValue = read_bootloader_reply(self,data_buf[1])
-
+    elif(command == FBL_INTERNAL_GET_HELP_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_GET_CID_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_GET_RDP_LEVEL_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_GO_TO_ADDR_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_ERASE_FLASH_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_MEMORY_WRITE_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_MEMORY_READ_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_READ_SECTOR_PROTECTION_STATUS_CMD):
+        a = 0
+    elif(command == FBL_INTERNAL_READ_OTP_CMD):
+        a = 0   
+    elif(command == FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD):
+        a = 0   
 
 
 #-----------------------------------------------------------------------------
