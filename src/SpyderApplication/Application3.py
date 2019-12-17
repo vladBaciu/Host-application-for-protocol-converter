@@ -508,20 +508,55 @@ def HandleCommands(self,command):
         data_buf[3] = word_to_byte(crc32,2,1) 
         data_buf[4] = word_to_byte(crc32,3,1) 
         data_buf[5] = word_to_byte(crc32,4,1) 
-
-        
-        
         for i in data_buf[0:FBL_COMMAND_BL_GET_VER_LEN]:
-            print(hex(i))
+            #print(hex(i))
+            Write_to_serial_port(self,i)
+        retValue = read_bootloader_reply(self,data_buf[1])
+    elif(command == FBL_INTERNAL_GET_HELP_CMD):
+        FBL_COMMAND_BL_GET_HELP_CMD_LEN = 6
+        data_buf[0] = FBL_COMMAND_BL_GET_HELP_CMD_LEN - 1
+        data_buf[1] = int(FBL_GET_HELP_CMD,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_GET_HELP_CMD_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_GET_HELP_CMD_LEN]:
+            #print(hex(i))
             Write_to_serial_port(self,i)
          
         retValue = read_bootloader_reply(self,data_buf[1])
-    elif(command == FBL_INTERNAL_GET_HELP_CMD):
-        a = 0
     elif(command == FBL_INTERNAL_GET_CID_CMD):
-        a = 0
+        FBL_COMMAND_BL_GET_CID_CMD_LEN = 6
+        data_buf[0] = FBL_COMMAND_BL_GET_CID_CMD_LEN - 1
+        data_buf[1] = int(FBL_GET_CID_CMD,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_GET_CID_CMD_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_GET_CID_CMD_LEN]:
+            #print(hex(i))
+            Write_to_serial_port(self,i)
+         
+        retValue = read_bootloader_reply(self,data_buf[1])
     elif(command == FBL_INTERNAL_GET_RDP_LEVEL_CMD):
-        a = 0
+        FBL_COMMAND_BL_GET_RDP_CMD_LEN = 6
+        data_buf[0] = FBL_COMMAND_BL_GET_RDP_CMD_LEN - 1
+        data_buf[1] = int(FBL_GET_RDP_LEVEL_CMD,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_GET_RDP_CMD_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_GET_RDP_CMD_LEN]:
+            #print(hex(i))
+            Write_to_serial_port(self,i)
+         
+        retValue = read_bootloader_reply(self,data_buf[1])
     elif(command == FBL_INTERNAL_GO_TO_ADDR_CMD):
         a = 0
     elif(command == FBL_INTERNAL_ERASE_FLASH_CMD):
@@ -529,15 +564,49 @@ def HandleCommands(self,command):
     elif(command == FBL_INTERNAL_MEMORY_WRITE_CMD):
         a = 0
     elif(command == FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD):
-        a = 0
+        
+        a = 0     
     elif(command == FBL_INTERNAL_MEMORY_READ_CMD):
         a = 0
     elif(command == FBL_INTERNAL_READ_SECTOR_PROTECTION_STATUS_CMD):
-        a = 0
+        FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN = 6
+        data_buf[0] = FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN - 1
+        data_buf[1] = int(FBL_READ_SECTOR_PROTECTION_STATUS_CMD,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN]:
+            #print(hex(i))
+            Write_to_serial_port(self,i)
     elif(command == FBL_INTERNAL_READ_OTP_CMD):
-        a = 0   
+        FBL_COMMAND_BL_READ_OTP_CMD_LEN = 6
+        data_buf[0] = FBL_COMMAND_BL_READ_OTP_CMD_LEN - 1
+        data_buf[1] = int(FBL_READ_OTP_CMD,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_READ_OTP_CMD_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_READ_OTP_CMD_LEN]:
+            #print(hex(i))
+            Write_to_serial_port(self,i)
     elif(command == FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD):
-        a = 0   
+        FBL_COMMAND_BL_GET_DISABLE_RW_CMD_LEN = 6
+        data_buf[0] = FBL_COMMAND_BL_GET_DISABLE_RW_CMD_LEN - 1
+        data_buf[1] = int(FBL_DISABLE_RW_PROTECTION_CMD,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_GET_DISABLE_RW_CMD_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[2] = word_to_byte(crc32,1,1) 
+        data_buf[3] = word_to_byte(crc32,2,1) 
+        data_buf[4] = word_to_byte(crc32,3,1) 
+        data_buf[5] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_GET_DISABLE_RW_CMD_LEN]:
+            #print(hex(i))
+            Write_to_serial_port(self,i)
 
 
 #-----------------------------------------------------------------------------
