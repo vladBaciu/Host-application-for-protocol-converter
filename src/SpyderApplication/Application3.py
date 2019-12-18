@@ -13,8 +13,17 @@ import threading
 saveHandler = False
 init_done = False
 stillConnected = False
-serialCOM = "";
-baudRate = "";
+
+serialCOM = ""
+baudRate = ""
+goToAddress = ""
+memoryWriteAddress = ""
+memoryReadAddress = ""
+readLength = ""
+sectorNumber = ""
+numberofSectors = ""
+
+
 serialComHandler = serial.Serial()
 import Settings
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -296,13 +305,22 @@ class Ui_MainWindow(object):
         self.comboBox.currentIndexChanged.connect(self.ReadCommands)
     
     def ParseInitFile(self):
-         global serialCOM 
+         global serialCOM
          global baudRate
+         global sectorNumber
+         global numberofSectors
          with open('InitFile.ini','r') as commandsFile:
              serialCOM = commandsFile.readlines()[1][12:16]
              commandsFile.seek(0)
              baudRate = commandsFile.readlines()[2]
              baudRate = baudRate.split('"')[1]
+             commandsFile.seek(0)
+             sectorNumber = commandsFile.readlines()[9]
+             sectorNumber = sectorNumber.split('"')[1]
+             commandsFile.seek(0)
+             numberofSectors = commandsFile.readlines()[10]
+             numberofSectors = numberofSectors.split('"')[1]
+             commandsFile.seek(0)
              
     def InitSerialCommunication(self):
         global serialComHandler
@@ -390,7 +408,7 @@ def Write_to_serial_port(self,value):
         self.textBrowser.setFont(myFont)
         self.textBrowser.setText(self.textBrowser.toPlainText() + " " + output)
         serialComHandler.write(data)
-        print("send")
+        #print("send")
         
 
 
@@ -560,7 +578,22 @@ def HandleCommands(self,command):
     elif(command == FBL_INTERNAL_GO_TO_ADDR_CMD):
         a = 0
     elif(command == FBL_INTERNAL_ERASE_FLASH_CMD):
-        a = 0
+        FBL_COMMAND_BL_FLASH_ERASE_LEN = 8
+        data_buf[0] = FBL_COMMAND_BL_FLASH_ERASE_LEN - 1
+        data_buf[1] = int(FBL_ERASE_FLASH_CMD,16)
+        data_buf[2] = int(sectorNumber,16)
+        data_buf[3] = int(numberofSectors,16)
+        crc32 =  get_crc(data_buf,FBL_COMMAND_BL_FLASH_ERASE_LEN-4)
+        crc32 = crc32 & 0xffffffff
+        data_buf[4] = word_to_byte(crc32,1,1) 
+        data_buf[5] = word_to_byte(crc32,2,1) 
+        data_buf[6] = word_to_byte(crc32,3,1) 
+        data_buf[7] = word_to_byte(crc32,4,1) 
+        for i in data_buf[0:FBL_COMMAND_BL_FLASH_ERASE_LEN]:
+            #print(hex(i))
+            Write_to_serial_port(self,i)
+         
+        retValue = read_bootloader_reply(self,data_buf[1])
     elif(command == FBL_INTERNAL_MEMORY_WRITE_CMD):
         a = 0
     elif(command == FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD):
