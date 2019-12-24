@@ -14,6 +14,8 @@ saveHandler = False
 init_done = False
 stillConnected = False
 
+binaryFile=""
+
 serialCOM = ""
 baudRate = ""
 goToAddress = ""
@@ -32,6 +34,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 FBL_PROGRAM_FLASH = "0x00"
 FBL_INTERNAL_PROGRAM_FLASH = 13
+FBL_STREAM_SIZE = 128
 FBL_GET_VERSION_CMD = "0x14"
 FBL_INTERNAL_GET_VERSION_CMD = 1
 FBL_GET_HELP_CMD = "0x22"
@@ -56,6 +59,7 @@ FBL_READ_OTP_CMD = "0x1F"
 FBL_INTERNAL_READ_OTP_CMD = 11
 FBL_DISABLE_RW_PROTECTION_CMD = "0x6C"
 FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD = 12
+
 
 
 class Ui_MainWindow(object):
@@ -354,6 +358,22 @@ class Ui_MainWindow(object):
              payload = commandsFile.readlines()[11]
              payload = payload.split('"')[1]
              commandsFile.seek(0)
+             
+    def OpenBinaryFile(self):
+        global binaryFile
+        with open('InitFile.ini','r') as commandsFile:
+            directoryFile = commandsFile.readlines()[12]
+            directoryFile = directoryFile.split('"')[1]
+        binaryFile = open (directoryFile,'rb')
+    def CloseBinaryFile(self):
+        binaryFile.close()
+    def GetBinaryFileSize(self):
+        with open('InitFile.ini','r') as commandsFile:
+            directoryFile = commandsFile.readlines()[12]
+            directoryFile = directoryFile.split('"')[1]
+        size = os.path.getsize(directoryFile)
+        return size
+    
     def InitSerialCommunication(self):
         global serialComHandler
         global init_done
@@ -764,8 +784,60 @@ def HandleCommands(self,command):
             Write_to_serial_port(self,i)
             
     elif (command == FBL_INTERNAL_PROGRAM_FLASH):
-         print ("handler")
-
+         self.OpenBinaryFile()
+         fileSize = self.GetBinaryFileSize()
+         concatenatedString = "File size: " + str(fileSize) + " bytes."
+         self.textBrowser.append(concatenatedString)
+         font=QtGui.QFont()
+         font.setBold(True)
+         color= QtGui.QPalette()
+         color.setColor(QtGui.QPalette.Text, QtCore.Qt.green)
+         self.textBrowser_2.setPalette(color)
+         self.textBrowser_2.setFont(font)
+         self.textBrowser_2.clear()
+         self.textBrowser_2.append("Programming ........")
+         
+       
+         bytesToSend = fileSize
+         chunkSize = FBL_STREAM_SIZE
+         totalLength = chunkSize + 11
+         data_buf = [None] * totalLength
+         data_buf[1] = int(FBL_PROGRAM_FLASH,16);
+         memoryAddress = int(memoryWriteAddress,16)
+         data_buf[6] = FBL_STREAM_SIZE
+         
+         while(bytesToSend):
+            
+            if (bytesToSend >= FBL_STREAM_SIZE):
+                     chunkSize = FBL_STREAM_SIZE
+            else:
+                     chunkSize = bytesToSend  
+            data_buf[2] = word_to_byte(memoryAddress,1,1)
+            data_buf[3] = word_to_byte(memoryAddress,2,1)
+            data_buf[4] = word_to_byte(memoryAddress,3,1)
+            data_buf[5] = word_to_byte(memoryAddress,4,1)
+            print(chunkSize)
+            print(bytesToSend)
+            for i in range(chunkSize):
+                readByte = binaryFile.read(1)
+                readByte = bytearray(readByte)
+                data_buf[7+i] = int(readByte[0])
+            data_buf[0] = 1
+            crc32 = get_crc(data_buf, chunkSize + 7)
+            data_buf[7+chunkSize] = word_to_byte(crc32,1,1)
+            data_buf[8+chunkSize] = word_to_byte(crc32,2,1)
+            data_buf[9+chunkSize] = word_to_byte(crc32,3,1)
+            data_buf[10+chunkSize] = word_to_byte(crc32,4,1)
+            
+            memoryAddress = memoryAddress + chunkSize
+            bytesToSend = 0
+           # print(hex(data_buf[7]))
+         
+             
+         
+         
+         
+        # crc32 = get_crc(data_buf,commandLength-4)
 #-----------------------------------------------------------------------------
 
         
