@@ -8,7 +8,7 @@
 import serial
 import struct
 import os
-import threading
+import time
 
 saveHandler = False
 init_done = False
@@ -302,7 +302,20 @@ class Ui_MainWindow(object):
             
         
             
-                
+    def ProgrammingMessage(self):
+         self.OpenBinaryFile()
+         fileSize = self.GetBinaryFileSize()
+         concatenatedString = "File size: " + str(fileSize) + " bytes."
+         self.textBrowser.append(concatenatedString)
+         font=QtGui.QFont()
+         font.setBold(True)
+         color= QtGui.QPalette()
+         color.setColor(QtGui.QPalette.Text, QtCore.Qt.green)
+         self.textBrowser_2.setPalette(color)
+         self.textBrowser_2.setFont(font)
+         self.textBrowser_2.clear()
+         self.textBrowser_2.append("Binary file uploaded ")
+                     
     def CheckButton(self, MainWindow):
         self.pushButton.clicked.connect(self.SendCommand)
     
@@ -462,7 +475,11 @@ def Write_to_serial_port(self,value):
         serialComHandler.write(data)
         #print("send")
         
-
+def Flash_to_serial_port(self,value):
+    if stillConnected:
+        data = struct.pack('>B', value)
+        serialComHandler.write(data)
+        #print("send")
 
 
 
@@ -784,20 +801,10 @@ def HandleCommands(self,command):
             Write_to_serial_port(self,i)
             
     elif (command == FBL_INTERNAL_PROGRAM_FLASH):
+         FBL_COMMAND_WRITE_PROGRAM_FLASH_LEN = 11
          self.OpenBinaryFile()
          fileSize = self.GetBinaryFileSize()
-         concatenatedString = "File size: " + str(fileSize) + " bytes."
-         self.textBrowser.append(concatenatedString)
-         font=QtGui.QFont()
-         font.setBold(True)
-         color= QtGui.QPalette()
-         color.setColor(QtGui.QPalette.Text, QtCore.Qt.green)
-         self.textBrowser_2.setPalette(color)
-         self.textBrowser_2.setFont(font)
-         self.textBrowser_2.clear()
-         self.textBrowser_2.append("Programming ........")
-         
-       
+         self.ProgrammingMessage()
          bytesToSend = fileSize
          chunkSize = FBL_STREAM_SIZE
          totalLength = chunkSize + 11
@@ -805,34 +812,40 @@ def HandleCommands(self,command):
          data_buf[1] = int(FBL_PROGRAM_FLASH,16);
          memoryAddress = int(memoryWriteAddress,16)
          data_buf[6] = FBL_STREAM_SIZE
-         
+        
          while(bytesToSend):
-            
+           
             if (bytesToSend >= FBL_STREAM_SIZE):
                      chunkSize = FBL_STREAM_SIZE
+                     bytesToSend = bytesToSend - FBL_STREAM_SIZE
             else:
-                     chunkSize = bytesToSend  
+                     chunkSize = bytesToSend
+                     bytesToSend = 0
             data_buf[2] = word_to_byte(memoryAddress,1,1)
             data_buf[3] = word_to_byte(memoryAddress,2,1)
             data_buf[4] = word_to_byte(memoryAddress,3,1)
             data_buf[5] = word_to_byte(memoryAddress,4,1)
-            print(chunkSize)
-            print(bytesToSend)
+            
             for i in range(chunkSize):
                 readByte = binaryFile.read(1)
                 readByte = bytearray(readByte)
                 data_buf[7+i] = int(readByte[0])
-            data_buf[0] = 1
+            
+            command_total_length = FBL_COMMAND_WRITE_PROGRAM_FLASH_LEN + chunkSize
+            data_buf[0] = command_total_length - 1
             crc32 = get_crc(data_buf, chunkSize + 7)
             data_buf[7+chunkSize] = word_to_byte(crc32,1,1)
             data_buf[8+chunkSize] = word_to_byte(crc32,2,1)
             data_buf[9+chunkSize] = word_to_byte(crc32,3,1)
             data_buf[10+chunkSize] = word_to_byte(crc32,4,1)
-            
             memoryAddress = memoryAddress + chunkSize
-            bytesToSend = 0
-           # print(hex(data_buf[7]))
+           
+            for j in data_buf[0:(command_total_length-1)]:
+                Flash_to_serial_port(self,j)
+                #print(hex(j))
          
+        
+         #print (fileSize)
              
          
          
