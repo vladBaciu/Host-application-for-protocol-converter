@@ -756,7 +756,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1]) 
+        retValue = read_bootloader_reply(self,data_buf[1])
     elif(command == FBL_INTERNAL_READ_SECTOR_PROTECTION_STATUS_CMD):
         
         FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN = 6
