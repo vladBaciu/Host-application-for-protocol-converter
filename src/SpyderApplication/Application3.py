@@ -393,21 +393,16 @@ class Ui_MainWindow(object):
         global stillConnected
         #print ("CALL")
         self.ParseInitFile()
-      
-        try:
-                serialComHandler.close()
-                serialComm = serial.Serial()
-                serialComm.baudrate = baudRate
-                serialComm.port = serialCOM
-                serialComm.open()
-                serialComHandler = serialComm
-                if serialComm.is_open is True:
-                    font=QtGui.QFont()
-                    font.setBold(True)
+        myFont = QtGui.QFont("Times", 14, QtGui.QFont.Bold)
+        try:    
+                Serial_Port_Configuration(serialCOM,baudRate)
+                if serialComHandler.is_open is True:
+                    
+                    
                     color= QtGui.QPalette()
-                    color.setColor(QtGui.QPalette.Text, QtCore.Qt.green)
+                    color.setColor(QtGui.QPalette.Text, QtCore.Qt.darkGreen)
                     self.textBrowser_2.setPalette(color)
-                    self.textBrowser_2.setFont(font)
+                    self.textBrowser_2.setFont(myFont)
                     self.textBrowser_2.clear()
                     self.textBrowser.clear()
                     self.textBrowser_2.append("COM port opened")
@@ -417,8 +412,6 @@ class Ui_MainWindow(object):
                   
         except:
                 stillConnected = False
-                myFont=QtGui.QFont()
-                myFont.setBold(True)
                 color= QtGui.QPalette()
                 color.setColor(QtGui.QPalette.Text, QtCore.Qt.red)
                 self.textBrowser_2.setPalette(color)
@@ -451,6 +444,57 @@ def get_crc(buff, length):
 #-----------------------------------------------------------------------------
 
 #----------------------------SERIAL-------------------------------------------
+#----------------------------- Serial Port ----------------------------------------
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
+
+def Serial_Port_Configuration(port,baud):
+    global serialComHandler
+    try:
+        serialComHandler = serial.Serial(port,115200,timeout=2)
+    except:
+        print("\n   Oops! That was not a valid port")
+        
+        port = serial_ports()
+        if(not port):
+            print("\n   No ports Detected")
+        else:
+            print("\n   Here are some available ports on your PC. Try Again!")
+            print("\n   ",port)
+        return -1
+    if serialComHandler.is_open:
+        print("\n   Port Open Success")
+    else:
+        print("\n   Port Open Failed")
+    return 0
+
+
+
 def read_serial_port(length):
     read_value = serialComHandler.read(length)
     return read_value
@@ -463,16 +507,17 @@ def purge_serial_port():
 def Write_to_serial_port(self,value):
     if stillConnected:
         data = struct.pack('>B', value)
+        serialComHandler.write(data)
         value = bytearray(data)
-        output = "0x{:02x}".format(value[0])
-        myFont=QtGui.QFont()
+        output = "0x{:02X}".format(value[0])
+        myFont=QtGui.QFont("Times", 8, QtGui.QFont.Bold)
         myFont.setBold(True)
         color= QtGui.QPalette()
         color.setColor(QtGui.QPalette.Text, QtCore.Qt.black)
         self.textBrowser.setPalette(color)
         self.textBrowser.setFont(myFont)
         self.textBrowser.setText(self.textBrowser.toPlainText() + " " + output)
-        serialComHandler.write(data)
+        
         #print("send")
         
 def Flash_to_serial_port(self,value):
@@ -487,30 +532,37 @@ def Flash_to_serial_port(self,value):
 
 #----------------------------HANDLE-------------------------------------------
 def read_bootloader_reply(self,command_code):
-    #ack=[0,0]
+   
     len_to_follow=0 
     ret = -2 
 
-    #read_serial_port(ack,2)
-    #ack = ser.read(2)
-    ack=read_serial_port(20)
+ 
+    ack=read_serial_port(2)
     if(len(ack)):
         a_array=bytearray(ack)
         self.textBrowser_2.clear()
-        self.textBrowser_2.append("Dummy data received")
         
-        print(ack)
+        print("command code ", command_code)
+        print("read uart:",ack) 
         if (a_array[0]== 0xA5):
             #CRC of last command was good .. received ACK and "len to follow"
             len_to_follow=a_array[1]
             print("\n   CRC : SUCCESS Len :",len_to_follow)
             #print("command_code:",hex(command_code))
             if (command_code == FBL_GET_VERSION_CMD) :
-                #Receive_GetVersion(len_to_follow)
+                fbl_version = read_serial_port(len_to_follow)
+                fbl_version_value = bytearray(fbl_version)
+                self.textBrowser_2.append("FBL_VERSION: ")
+                self.textBrowser_2.append(''.join([ '0x', hex(fbl_version_value[0]).upper()[2:] ]))
                 a = 0
             elif(command_code == FBL_GET_HELP_CMD):
-               # process_COMMAND_BL_GET_HELP(len_to_follow)
-               a = 0 
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                supported_commands = read_serial_port(len_to_follow)
+                supported_commands_value = bytearray(supported_commands)
+                self.textBrowser_2.append("Supported commands: ")
+                self.textBrowser_2.append(' '.join('0x{:02X}'.format(x) for x in supported_commands_value))
+ 
             elif(command_code == FBL_GET_CID_CMD):
                # process_COMMAND_BL_GET_CID(len_to_follow)
                a = 0
@@ -594,11 +646,14 @@ def HandleCommands(self,command):
         data_buf[2] = word_to_byte(crc32,1,1) 
         data_buf[3] = word_to_byte(crc32,2,1) 
         data_buf[4] = word_to_byte(crc32,3,1) 
-        data_buf[5] = word_to_byte(crc32,4,1) 
-        for i in data_buf[0:FBL_COMMAND_BL_GET_VER_LEN]:
+        data_buf[5] = word_to_byte(crc32,4,1)
+        
+        Write_to_serial_port(self,data_buf[0])
+        for i in data_buf[1:FBL_COMMAND_BL_GET_VER_LEN]:
             #print(hex(i))
             Write_to_serial_port(self,i)
-        retValue = read_bootloader_reply(self,data_buf[1])
+        
+        retValue = read_bootloader_reply(self,FBL_GET_VERSION_CMD)
     elif(command == FBL_INTERNAL_GET_HELP_CMD):
         
         FBL_COMMAND_BL_GET_HELP_CMD_LEN = 6
@@ -614,7 +669,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])
+        retValue = read_bootloader_reply(self,FBL_GET_HELP_CMD)
     elif(command == FBL_INTERNAL_GET_CID_CMD):
         
         FBL_COMMAND_BL_GET_CID_CMD_LEN = 6
