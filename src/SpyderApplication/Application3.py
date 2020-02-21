@@ -251,7 +251,7 @@ class Ui_MainWindow(object):
             self.textBrowser.clear()
             self.textBrowser.append(self.listWidget.currentItem().text())
             word_list = self.listWidget.currentItem().text().split()
-            
+            self.purge_serial_port()
             global detectChanges
             if Settings.detectChanges is True:
                 serialComHandler.close()
@@ -420,9 +420,12 @@ class Ui_MainWindow(object):
                 self.textBrowser.clear()
                 self.textBrowser_2.append("Error: Check communication port and other settings")
         
-        
+    def purge_serial_port(self):
+         serialComHandler.reset_input_buffer() 
+         serialComHandler.reset_output_buffer()
 #       serialComm.port) = self.ui.GetComName()
-      
+    def Close_serial_port(self):
+         serialComHandler.close()   
        
 
 #------------------------------COMMON-----------------------------------------
@@ -496,13 +499,11 @@ def Serial_Port_Configuration(port,baud):
 
 
 def read_serial_port(length):
+    serialComHandler.timeout = 4
     read_value = serialComHandler.read(length)
     return read_value
 
-def Close_serial_port():
-    pass
-def purge_serial_port():
-    serialComHandler.reset_input_buffer()
+
     
 def Write_to_serial_port(self,value):
     if stillConnected:
@@ -535,26 +536,31 @@ def read_bootloader_reply(self,command_code):
    
     len_to_follow=0 
     ret = -2 
-
- 
+    self.purge_serial_port()
+   
     ack=read_serial_port(2)
+    print("read uart:",ack) 
     if(len(ack)):
         a_array=bytearray(ack)
         self.textBrowser_2.clear()
         
         print("command code ", command_code)
-        print("read uart:",ack) 
+        
         if (a_array[0]== 0xA5):
+            color= QtGui.QPalette()
+            color.setColor(QtGui.QPalette.Text, QtCore.Qt.darkGreen)
+            self.textBrowser_2.setPalette(color)
             #CRC of last command was good .. received ACK and "len to follow"
             len_to_follow=a_array[1]
             print("\n   CRC : SUCCESS Len :",len_to_follow)
             #print("command_code:",hex(command_code))
-            if (command_code == FBL_GET_VERSION_CMD) :
+            if (command_code == FBL_GET_VERSION_CMD):
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
                 fbl_version = read_serial_port(len_to_follow)
                 fbl_version_value = bytearray(fbl_version)
                 self.textBrowser_2.append("FBL_VERSION: ")
                 self.textBrowser_2.append(''.join([ '0x', hex(fbl_version_value[0]).upper()[2:] ]))
-                a = 0
             elif(command_code == FBL_GET_HELP_CMD):
                 newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
                 self.textBrowser_2.setFont(newFont)
@@ -562,16 +568,31 @@ def read_bootloader_reply(self,command_code):
                 supported_commands_value = bytearray(supported_commands)
                 self.textBrowser_2.append("Supported commands: ")
                 self.textBrowser_2.append(' '.join('0x{:02X}'.format(x) for x in supported_commands_value))
- 
             elif(command_code == FBL_GET_CID_CMD):
-               # process_COMMAND_BL_GET_CID(len_to_follow)
-               a = 0
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                chip_id = read_serial_port(len_to_follow)
+                chip_id_value = bytearray(chip_id)
+                self.textBrowser_2.append("Manufacturing chip ID: ")
+                self.textBrowser_2.append("0x" + ''.join('{:02X}'.format(x) for x in reversed(chip_id_value)))
             elif(command_code == FBL_GET_RDP_LEVEL_CMD):
-                #process_COMMAND_BL_GET_RDP_STATUS(len_to_follow)
-                a = 0
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                rdp_level = read_serial_port(len_to_follow)
+                rdp_level_value = bytearray(rdp_level)
+                self.textBrowser_2.append("Read protection level: ")
+                self.textBrowser_2.append(''.join([ '0x', hex(rdp_level_value[0]).upper()[2:] ]))
             elif(command_code == FBL_GO_TO_ADDR_CMD):
-               # process_COMMAND_BL_GO_TO_ADDR(len_to_follow)
-                a = 0
+                jump_status = read_serial_port(len_to_follow)
+                jump_status_value = bytearray(jump_status)
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                if (jump_status_value[0] == 0x0A):
+                   self.textBrowser_2.append("Jumped to address: " + goToAddress)  
+                elif (jump_status_value[0] == 0x0C):
+                   self.textBrowser_2.append("Invalid address: " + goToAddress)  
+                else:
+                   self.textBrowser_2.append(" Unknown return code ")  
             elif(command_code == FBL_ERASE_FLASH_CMD):
                 #process_COMMAND_BL_FLASH_ERASE(len_to_follow)
                 a = 0
@@ -601,7 +622,7 @@ def read_bootloader_reply(self,command_code):
                 self.textBrowser_2.setPalette(color)
                 self.textBrowser_2.setFont(myFont)
                 self.textBrowser_2.clear()
-                self.textBrowser_2.append(" Invalid command code. ")
+                self.textBrowser_2.append(" Invalid command code ")
                 
             ret = 0
          
@@ -616,6 +637,17 @@ def read_bootloader_reply(self,command_code):
             self.textBrowser_2.clear()
             self.textBrowser_2.append(" CRC: FAIL ")
             ret= -1
+        else:
+             myFont=QtGui.QFont()
+             myFont.setBold(True)
+             color= QtGui.QPalette()
+             color.setColor(QtGui.QPalette.Text, QtCore.Qt.red)
+             self.textBrowser_2.setPalette(color)
+             self.textBrowser_2.setFont(myFont)
+             self.textBrowser_2.clear()
+             self.textBrowser_2.append("Bootloader not responding. Restart the board")
+             self.purge_serial_port()
+             #self.InitSerialCommunication()
     else:
          
           myFont=QtGui.QFont()
@@ -626,6 +658,8 @@ def read_bootloader_reply(self,command_code):
           self.textBrowser_2.setFont(myFont)
           self.textBrowser_2.clear()
           self.textBrowser_2.append("Timeout : Bootloader not responding")
+          self.purge_serial_port()
+          #self.InitSerialCommunication()
     return ret
 
 def HandleCommands(self,command):
@@ -685,7 +719,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])
+        retValue = read_bootloader_reply(self,FBL_GET_CID_CMD)
     elif(command == FBL_INTERNAL_GET_RDP_LEVEL_CMD):
         
         FBL_COMMAND_BL_GET_RDP_CMD_LEN = 6
@@ -701,7 +735,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])
+        retValue = read_bootloader_reply(self,FBL_GET_RDP_LEVEL_CMD)
     elif(command == FBL_INTERNAL_GO_TO_ADDR_CMD):
         
         FBL_COMMAND_GO_TO_ADDRESS_LEN = 10
@@ -724,7 +758,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1]) 
+        retValue = read_bootloader_reply(self,FBL_GO_TO_ADDR_CMD) 
     elif(command == FBL_INTERNAL_ERASE_FLASH_CMD):
         
         FBL_COMMAND_BL_FLASH_ERASE_LEN = 8
@@ -769,7 +803,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])     
+        retValue = read_bootloader_reply(self,FBL_ERASE_FLASH_CMD)     
     elif(command == FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD):
         
         FBL_COMMAND_ENABLE_RW_LEN = 8
@@ -787,7 +821,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])     
+        retValue = read_bootloader_reply(self,FBL_ENABLE_RW_PROTECTION_CMD)     
     elif(command == FBL_INTERNAL_MEMORY_READ_CMD):
         
         FBL_COMMAND_MEMORY_READ_LEN = 11
@@ -811,7 +845,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])
+        retValue = read_bootloader_reply(self,FBL_MEMORY_READ_CMD)
     elif(command == FBL_INTERNAL_READ_SECTOR_PROTECTION_STATUS_CMD):
         
         FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN = 6
@@ -826,6 +860,8 @@ def HandleCommands(self,command):
         for i in data_buf[0:FBL_COMMAND_BL_READ_SECTOR_STATUS_CMD_LEN]:
             #print(hex(i))
             Write_to_serial_port(self,i)
+            
+        retValue = read_bootloader_reply(self,FBL_READ_SECTOR_PROTECTION_STATUS_CMD)
     elif(command == FBL_INTERNAL_READ_OTP_CMD):
         
         FBL_COMMAND_BL_READ_OTP_CMD_LEN = 6
@@ -840,6 +876,9 @@ def HandleCommands(self,command):
         for i in data_buf[0:FBL_COMMAND_BL_READ_OTP_CMD_LEN]:
             #print(hex(i))
             Write_to_serial_port(self,i)
+        
+        retValue = read_bootloader_reply(self,FBL_READ_OTP_CMD)
+
     elif(command == FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD):
         
         FBL_COMMAND_BL_GET_DISABLE_RW_CMD_LEN = 6
@@ -855,6 +894,8 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
             
+        retValue = read_bootloader_reply(self,FBL_DISABLE_RW_PROTECTION_CMD)
+    
     elif (command == FBL_INTERNAL_PROGRAM_FLASH):
          FBL_COMMAND_WRITE_PROGRAM_FLASH_LEN = 11
          self.OpenBinaryFile()
@@ -927,4 +968,4 @@ if __name__ == "__main__":
     ui.CommandTypeSelection(MainWindow)
     MainWindow.show()
     app.exec_()
-
+    ui.Close_serial_port()
