@@ -32,9 +32,9 @@ serialComHandler = serial.Serial()
 import Settings
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-FBL_PROGRAM_FLASH = "0x00"
+FBL_PROGRAM_FLASH = "0x33"
 FBL_INTERNAL_PROGRAM_FLASH = 13
-FBL_STREAM_SIZE = 128
+FBL_STREAM_SIZE = 0x80
 FBL_GET_VERSION_CMD = "0x14"
 FBL_INTERNAL_GET_VERSION_CMD = 1
 FBL_GET_HELP_CMD = "0x22"
@@ -295,6 +295,12 @@ class Ui_MainWindow(object):
                 #self.textBrowser.append(word_list[-1])
                 HandleCommands(self,FBL_INTERNAL_DISABLE_RW_PROTECTION_CMD) 
             elif (FBL_PROGRAM_FLASH == word_list[-1]):
+                newColor= QtGui.QPalette()
+                newColor.setColor(QtGui.QPalette.Text, QtCore.Qt.darkGreen)
+                self.textBrowser_2.setPalette(newColor)
+                newFont = QtGui.QFont("Times", 12, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                self.textBrowser_2.append("Programming .... ")
                 HandleCommands(self,FBL_INTERNAL_PROGRAM_FLASH) 
             else:
                 HandleCommands(self,0) 
@@ -303,16 +309,16 @@ class Ui_MainWindow(object):
         
             
     def ProgrammingMessage(self):
+        
          self.OpenBinaryFile()
          fileSize = self.GetBinaryFileSize()
          concatenatedString = "File size: " + str(fileSize) + " bytes."
          self.textBrowser.append(concatenatedString)
-         font=QtGui.QFont()
-         font.setBold(True)
-         color= QtGui.QPalette()
-         color.setColor(QtGui.QPalette.Text, QtCore.Qt.green)
-         self.textBrowser_2.setPalette(color)
-         self.textBrowser_2.setFont(font)
+         newColor= QtGui.QPalette()
+         newColor.setColor(QtGui.QPalette.Text, QtCore.Qt.darkGreen)
+         self.textBrowser_2.setPalette(newColor)
+         newFont = QtGui.QFont("Times", 12, QtGui.QFont.Bold)
+         self.textBrowser_2.setFont(newFont)
          self.textBrowser_2.clear()
          self.textBrowser_2.append("Binary file uploaded ")
                      
@@ -409,7 +415,15 @@ class Ui_MainWindow(object):
                     #serialComm.write(b'Hello')
                     init_done = True
                     stillConnected = True
-                  
+                else:
+                    newColor= QtGui.QPalette()
+                    newColor.setColor(QtGui.QPalette.Text, QtCore.Qt.darkRed)
+                    self.textBrowser_2.setPalette(newColor)
+                    newFont = QtGui.QFont("Times", 12, QtGui.QFont.Bold)
+                    self.textBrowser_2.setFont(newFont)
+                    self.textBrowser_2.append("Port busy or not valid")
+
+                 
         except:
                 stillConnected = False
                 color= QtGui.QPalette()
@@ -594,11 +608,49 @@ def read_bootloader_reply(self,command_code):
                 else:
                    self.textBrowser_2.append(" Unknown return code ")  
             elif(command_code == FBL_ERASE_FLASH_CMD):
-                #process_COMMAND_BL_FLASH_ERASE(len_to_follow)
-                a = 0
+                erase_status = read_serial_port(len_to_follow)
+                erase_status_value = bytearray(erase_status)
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                if (erase_status_value[0] == 0x0D):
+                   self.textBrowser_2.append("Erase failed. Invalid sector number: " + sectorNumber)  
+                elif (erase_status_value[0] == 0x0B):
+                   newFont = QtGui.QFont("Times", 9, QtGui.QFont.Bold)
+                   self.textBrowser_2.setFont(newFont)
+                   self.textBrowser_2.append("Erase failed. Invalid number of sectors: " + numberofSectors)
+                elif (erase_status_value[0] == 0x01): 
+                   self.textBrowser_2.append("HAL ERROR: 0x01")
+                elif (erase_status_value[0] == 0x02): 
+                   self.textBrowser_2.append("HAL BUSY: 0x02")
+                elif (erase_status_value[0] == 0x03): 
+                   self.textBrowser_2.append("HAL TIMEOUT: 0x03")
+                elif (erase_status_value[0] == 0x00): 
+                   self.textBrowser_2.append("Erase done successfully.") 
+                   self.textBrowser_2.append("Sector number: " + sectorNumber) 
+                   self.textBrowser_2.append("Number of sectors: " + numberofSectors) 
+                else:
+                   self.textBrowser_2.append(" Unknown return code ")  
             elif(command_code == FBL_MEMORY_WRITE_CMD):
-                #process_COMMAND_BL_MEM_WRITE(len_to_follow)
-                a = 0
+                writeByte_status = read_serial_port(len_to_follow)
+                writeByte_status_value = bytearray(writeByte_status)
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                if (writeByte_status_value[0] == 0xCC):
+                   self.textBrowser_2.append("Write " + payload + " to " + memoryWriteAddress)  
+                elif (writeByte_status_value[0] == 0x0C):
+                   self.textBrowser_2.append("Invalid address: " + memoryWriteAddress)
+                elif (writeByte_status_value[0] == 0xAA):
+                   self.textBrowser_2.append("Generic error.")  
+                elif (writeByte_status_value[0] == 0x01): 
+                   self.textBrowser_2.append("HAL ERROR: 0x01")
+                elif (writeByte_status_value[0] == 0x02): 
+                   self.textBrowser_2.append("HAL BUSY: 0x02")
+                elif (writeByte_status_value[0] == 0x03): 
+                   self.textBrowser_2.append("HAL TIMEOUT: 0x03")
+                elif (writeByte_status_value[0] == 0x00):
+                   self.textBrowser_2.append("Write successfully" + payload + " to " + memoryWriteAddress)
+                else:
+                   self.textBrowser_2.append(" Unknown return code " + hex(writeByte_status_value[0])) 
             elif(command_code == FBL_ENABLE_RW_PROTECTION_CMD):
                 #process_COMMAND_BL_READ_SECTOR_STATUS(len_to_follow)
                 a = 0
@@ -776,7 +828,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,data_buf[1])
+        retValue = read_bootloader_reply(self,FBL_ERASE_FLASH_CMD)
     elif(command == FBL_INTERNAL_MEMORY_WRITE_CMD):
         
         FBL_COMMAND_WRITE_TO_MEMORY_LEN = 15
@@ -803,7 +855,7 @@ def HandleCommands(self,command):
             #print(hex(i))
             Write_to_serial_port(self,i)
          
-        retValue = read_bootloader_reply(self,FBL_ERASE_FLASH_CMD)     
+        retValue = read_bootloader_reply(self,FBL_MEMORY_WRITE_CMD)     
     elif(command == FBL_INTERNAL_ENABLE_RW_PROTECTION_CMD):
         
         FBL_COMMAND_ENABLE_RW_LEN = 8
@@ -908,7 +960,6 @@ def HandleCommands(self,command):
          data_buf[1] = int(FBL_PROGRAM_FLASH,16);
          memoryAddress = int(memoryWriteAddress,16)
          data_buf[6] = FBL_STREAM_SIZE
-        
          while(bytesToSend):
            
             if (bytesToSend >= FBL_STREAM_SIZE):
@@ -929,17 +980,22 @@ def HandleCommands(self,command):
             
             command_total_length = FBL_COMMAND_WRITE_PROGRAM_FLASH_LEN + chunkSize
             data_buf[0] = command_total_length - 1
-            crc32 = get_crc(data_buf, chunkSize + 7)
+            crc32 = get_crc(data_buf, command_total_length - 4)
+            crc32 = crc32 & 0xffffffff
             data_buf[7+chunkSize] = word_to_byte(crc32,1,1)
             data_buf[8+chunkSize] = word_to_byte(crc32,2,1)
             data_buf[9+chunkSize] = word_to_byte(crc32,3,1)
             data_buf[10+chunkSize] = word_to_byte(crc32,4,1)
             memoryAddress = memoryAddress + chunkSize
            
-            for j in data_buf[0:(command_total_length-1)]:
+            Flash_to_serial_port(self,data_buf[0])
+            for j in data_buf[1:command_total_length]:
                 Flash_to_serial_port(self,j)
+                
                 #print(hex(j))
-         
+            time.sleep(0.1)
+    else:
+         self.textBrowser_2.append("Inexistent command: ")
         
          #print (fileSize)
              

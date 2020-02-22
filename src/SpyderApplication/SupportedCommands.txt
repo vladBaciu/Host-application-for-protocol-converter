@@ -1,4 +1,4 @@
-Flash the board - 0x00
+Flash the board - 0x33
 Get bootloader version - 0x14
 Get help - 0x22
 Get chip identification number - 0x44
