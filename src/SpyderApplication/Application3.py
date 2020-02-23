@@ -194,8 +194,8 @@ class Ui_MainWindow(object):
         self.comboBox_3.setItemText(0, _translate("MainWindow", "USB to UART"))
         self.comboBox_3.setItemText(1, _translate("MainWindow", "USB to CAN"))
         self.comboBox_3.setItemText(2, _translate("MainWindow", "USB to WI-FI"))
-        self.label_5.setText(_translate("MainWindow", "Transmit status"))
-        self.label_6.setText(_translate("MainWindow", "Receive status"))
+        self.label_5.setText(_translate("MainWindow", "Tx status"))
+        self.label_6.setText(_translate("MainWindow", "Rx status"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.USB), _translate("MainWindow", "USB"))
         self.label_3.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/modes/dependences/WifiModelLogo.png\"/></p></body></html>"))
         self.comboBox_2.setItemText(0, _translate("MainWindow", "Loader Mode"))
@@ -513,7 +513,7 @@ def Serial_Port_Configuration(port,baud):
 
 
 def read_serial_port(length):
-    serialComHandler.timeout = 4
+    serialComHandler.timeout = 0.4
     read_value = serialComHandler.read(length)
     return read_value
 
@@ -648,24 +648,45 @@ def read_bootloader_reply(self,command_code):
                 elif (writeByte_status_value[0] == 0x03): 
                    self.textBrowser_2.append("HAL TIMEOUT: 0x03")
                 elif (writeByte_status_value[0] == 0x00):
-                   self.textBrowser_2.append("Write successfully" + payload + " to " + memoryWriteAddress)
+                   self.textBrowser_2.append("Write successfully " + payload + " to " + memoryWriteAddress)
                 else:
                    self.textBrowser_2.append(" Unknown return code " + hex(writeByte_status_value[0])) 
             elif(command_code == FBL_ENABLE_RW_PROTECTION_CMD):
-                #process_COMMAND_BL_READ_SECTOR_STATUS(len_to_follow)
-                a = 0
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                statusWRP = read_serial_port(len_to_follow)
+                statusWRP_value = bytearray(statusWRP)
+                if (statusWRP_value[0] == 0xCC):
+                    self.textBrowser_2.append("Write protection modified")
+                elif (statusWRP_value[0] == 0xAA):   
+                    self.textBrowser_2.append("Generic error.")
+                else:
+                    self.textBrowser_2.append(" Unknown return code " + hex(statusWRP_value[0]))   
+                
             elif(command_code == FBL_MEMORY_READ_CMD):
                 #process_COMMAND_BL_EN_R_W_PROTECT(len_to_follow)
                 a = 0
             elif(command_code == FBL_READ_SECTOR_PROTECTION_STATUS_CMD):
-                #process_COMMAND_BL_DIS_R_W_PROTECT(len_to_follow)
-                a = 0
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                protection_status = read_serial_port(len_to_follow)
+                protection_status_value = bytearray(protection_status)
+                self.textBrowser_2.append("SPRMOD: " + ''.join([ ' ', hex(protection_status_value[1]).upper()[2:] ]))
+                self.textBrowser_2.append("WRP: " + ''.join([ '0x', hex(protection_status_value[0]).upper()[2:] ]))
             elif(command_code == FBL_READ_OTP_CMD):
                 #process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
                 a = 0
             elif(command_code == FBL_DISABLE_RW_PROTECTION_CMD):
-                #process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
-                a = 0
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                statusWRP = read_serial_port(len_to_follow)
+                statusWRP_value = bytearray(statusWRP)
+                if (statusWRP_value[0] == 0xCC):
+                    self.textBrowser_2.append("Write protection disabled.")
+                elif (statusWRP_value[0] == 0xAA):   
+                    self.textBrowser_2.append("Generic error.")
+                else:
+                    self.textBrowser_2.append(" Unknown return code " + hex(statusWRP_value[0])) 
             else:
                 myFont=QtGui.QFont()
                 myFont.setBold(True)
