@@ -27,7 +27,7 @@ sectorNumber = ""
 numberofSectors = ""
 sectorsProtected = ""
 protectionModes = ""
-
+OTP_bank = ""
 serialComHandler = serial.Serial()
 import Settings
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -344,6 +344,7 @@ class Ui_MainWindow(object):
          global protectionModes
          global memoryWriteAddress
          global payload
+         global OTP_bank
          with open('InitFile.ini','r') as commandsFile:
              serialCOM = commandsFile.readlines()[1][12:16]
              commandsFile.seek(0)
@@ -376,6 +377,9 @@ class Ui_MainWindow(object):
              commandsFile.seek(0)
              payload = commandsFile.readlines()[11]
              payload = payload.split('"')[1]
+             commandsFile.seek(0)
+             OTP_bank = commandsFile.readlines()[17]
+             OTP_bank = OTP_bank.split('"')[1]
              commandsFile.seek(0)
              
     def OpenBinaryFile(self):
@@ -674,8 +678,18 @@ def read_bootloader_reply(self,command_code):
                 self.textBrowser_2.append("SPRMOD: " + ''.join([ ' ', hex(protection_status_value[1]).upper()[2:] ]))
                 self.textBrowser_2.append("WRP: " + ''.join([ '0x', hex(protection_status_value[0]).upper()[2:] ]))
             elif(command_code == FBL_READ_OTP_CMD):
-                #process_COMMAND_BL_MY_NEW_COMMAND(len_to_follow)
-                a = 0
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                OTP_answer = read_serial_port(len_to_follow)
+                OTP_answerValue = bytearray(OTP_answer) 
+                print (hex(OTP_answerValue[0]))
+                print (len_to_follow)
+                if ((len_to_follow == 1) & (OTP_answerValue[0] == 0xAA)):
+                    self.textBrowser_2.append("Invalid OTP bank")
+                elif (len_to_follow > 1):
+                    self.textBrowser_2.append(' '.join('0x{:02X}'.format(x) for x in OTP_answerValue))
+                else:
+                     self.textBrowser_2.append("Invalid return code")
             elif(command_code == FBL_DISABLE_RW_PROTECTION_CMD):
                 newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
                 self.textBrowser_2.setFont(newFont)
@@ -937,15 +951,16 @@ def HandleCommands(self,command):
         retValue = read_bootloader_reply(self,FBL_READ_SECTOR_PROTECTION_STATUS_CMD)
     elif(command == FBL_INTERNAL_READ_OTP_CMD):
         
-        FBL_COMMAND_BL_READ_OTP_CMD_LEN = 6
+        FBL_COMMAND_BL_READ_OTP_CMD_LEN = 7
         data_buf[0] = FBL_COMMAND_BL_READ_OTP_CMD_LEN - 1
         data_buf[1] = int(FBL_READ_OTP_CMD,16)
+        data_buf[2] = int(OTP_bank,16)
         crc32 =  get_crc(data_buf,FBL_COMMAND_BL_READ_OTP_CMD_LEN-4)
         crc32 = crc32 & 0xffffffff
-        data_buf[2] = word_to_byte(crc32,1,1) 
-        data_buf[3] = word_to_byte(crc32,2,1) 
-        data_buf[4] = word_to_byte(crc32,3,1) 
-        data_buf[5] = word_to_byte(crc32,4,1) 
+        data_buf[3] = word_to_byte(crc32,1,1) 
+        data_buf[4] = word_to_byte(crc32,2,1) 
+        data_buf[5] = word_to_byte(crc32,3,1) 
+        data_buf[6] = word_to_byte(crc32,4,1) 
         for i in data_buf[0:FBL_COMMAND_BL_READ_OTP_CMD_LEN]:
             #print(hex(i))
             Write_to_serial_port(self,i)
