@@ -668,8 +668,24 @@ def read_bootloader_reply(self,command_code):
                     self.textBrowser_2.append(" Unknown return code " + hex(statusWRP_value[0]))   
                 
             elif(command_code == FBL_MEMORY_READ_CMD):
-                #process_COMMAND_BL_EN_R_W_PROTECT(len_to_follow)
-                a = 0
+                readByte_status = read_serial_port(len_to_follow)
+                readByte_status_value = bytearray(readByte_status)
+                newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+                self.textBrowser_2.setFont(newFont)
+                if (readByte_status_value[0] == 0x0C):
+                    self.textBrowser_2.append("Invalid address: " + memoryReadAddress)
+                else:
+                    index = 0
+                    data = [None] * 4
+                    for x in (readByte_status_value):
+                        data[index] = x
+                        index = index +1
+                        if (index == 4): 
+                            self.textBrowser_2.append("0x" + "".join(["{:02X}"] * len(data)).format(*data))
+                            index = 0
+                       
+                            
+                                             
             elif(command_code == FBL_READ_SECTOR_PROTECTION_STATUS_CMD):
                 newFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
                 self.textBrowser_2.setFont(newFont)
